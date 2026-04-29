@@ -1,0 +1,225 @@
+name: "Python CI"
+
+on:
+  workflow_call:
+    inputs:
+      run_tests:
+        description: "Run unit tests and coverage"
+        required: false
+        type: boolean
+        default: ${{ github.event_name == 'pull_request' || github.ref_name == 'main' }}
+      allow_tests_failure:
+        description: "Allow tests to fail without failing the job"
+        required: false
+        type: boolean
+        default: false
+      run_lint:
+        description: "Run ruff lint"
+        required: false
+        type: boolean
+        default: ${{ github.event_name == 'pull_request' || github.ref_name == 'main' }}
+      lint_fail_on_issues:
+        description: "Fail build when ruff finds issues"
+        required: false
+        type: boolean
+        default: true
+      run_type_check:
+        description: "Run mypy type checking"
+        required: false
+        type: boolean
+        default: ${{ github.event_name == 'pull_request' || github.ref_name == 'main' }}
+      run_vulnerability_check:
+        description: "Run pip-audit"
+        required: false
+        type: boolean
+        default: ${{ github.event_name == 'pull_request' || github.ref_name == 'main' }}
+      run_build_image:
+        description: "Build and push container image"
+        required: false
+        type: boolean
+        default: ${{ github.event_name == 'pull_request' || github.ref_name == 'main' }}
+      coverage_threshold:
+        description: "Minimum coverage percentage required"
+        required: false
+        type: number
+        default: 70
+      container_registry:
+        description: "Container registry"
+        required: false
+        type: string
+        default: "ghcr.io"
+      image_tags:
+        description: "Comma-separated image tags"
+        required: false
+        type: string
+        default: ${{ github.event_name == 'schedule' && 'nightly' || '' }}
+    outputs:
+      image_digest:
+        description: "Image digest from build step"
+        value: ${{ jobs.build.outputs.image_digest }}
+
+permissions:
+  contents: read
+
+jobs:
+  static_checks:
+    name: "Static Checks"
+    if: ${{ inputs.run_lint || inputs.run_type_check }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Restore uv Cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-
+
+      - name: Install Dependencies
+        run: uv sync --frozen
+
+      - name: Run ruff lint
+        if: ${{ inputs.run_lint }}
+        run: |
+          uv run ruff check . \
+            --exit-non-zero-on-fix=${{ inputs.lint_fail_on_issues && 'true' || 'false' }}
+
+      - name: Run ruff format check
+        if: ${{ inputs.run_lint }}
+        run: uv run ruff format --check .
+
+      - name: Run mypy
+        if: ${{ inputs.run_type_check }}
+        run: uv run mypy ryushi/
+
+  tests:
+    name: "Tests & Coverage"
+    if: ${{ inputs.run_tests }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Restore uv Cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-
+
+      - name: Install Dependencies
+        run: uv sync --frozen
+
+      - name: Run Tests with Coverage
+        run: |
+          uv run pytest \
+            --cov=ryushi \
+            --cov-report=xml \
+            --cov-report=term-missing \
+            --cov-fail-under=${{ inputs.coverage_threshold }} \
+            --junitxml=test-results.xml \
+            -v
+        continue-on-error: ${{ inputs.allow_tests_failure }}
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: test-results.xml
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage.xml
+          retention-days: 7
+
+  vulnerability_check:
+    name: "Vulnerability Check"
+    if: ${{ inputs.run_vulnerability_check }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install Dependencies
+        run: uv sync --frozen
+
+      - name: Run pip-audit
+        run: uv run pip-audit
+
+  build:
+    name: "Build Container Image"
+    if: ${{ inputs.run_build_image }}
+    runs-on: ubuntu-latest
+    needs: [static_checks, tests]
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ inputs.container_registry }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Image Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ inputs.container_registry }}/${{ github.repository }}
+          tags: |
+            type=ref,event=pr
+            type=ref,event=branch
+            type=sha,prefix=sha-
+            ${{ inputs.image_tags != '' && format('type=raw,value={0}', inputs.image_tags) || '' }}
+
+      - name: Build and Push Image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ github.ref_name == 'main' || github.event_name == 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

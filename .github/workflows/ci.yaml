@@ -1,0 +1,29 @@
+name: Run CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+    tags:
+      - 'v*'
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  ryushi:
+    name: ryushi
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+      security-events: write
+      packages: write
+      actions: read
+    uses: ./.github/workflows/reusable-python-ci.yaml
+    with:
+      name: ryushi
+      module: .
+      lint_fail_on_issues: true
