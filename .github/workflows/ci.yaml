@@ -23,7 +23,3 @@ jobs:
       packages: write
       actions: read
     uses: ./.github/workflows/reusable-python-ci.yaml
-    with:
-      name: ryushi
-      module: .
-      lint_fail_on_issues: true
