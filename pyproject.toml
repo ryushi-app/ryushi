@@ -17,6 +17,7 @@ dependencies = [
     "apscheduler>=3.10,<4.0",
     "pydantic-settings>=2.7,<3.0",
     "pyyaml>=6.0,<7.0",
+    "starlette>=1.0",
 ]
 
 [project.optional-dependencies]
