@@ -92,8 +92,7 @@ jobs:
       - name: Run ruff lint
         if: ${{ inputs.run_lint }}
         run: |
-          uv run ruff check . \
-            --exit-non-zero-on-fix=${{ inputs.lint_fail_on_issues && 'true' || 'false' }}
+          uv run ruff check . ${{ inputs.lint_fail_on_issues && '--exit-non-zero-on-fix' || '' }}
 
       - name: Run ruff format check
         if: ${{ inputs.run_lint }}
