@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ryushi"
+version = "0.1.0"
+description = "AI-powered RSS digest service for FreshRSS"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.115,<0.116",
+    "uvicorn[standard]>=0.32,<0.33",
+    "httpx>=0.28,<0.29",
+    "litellm>=1.55,<2.0",
+    "feedgen>=1.0,<2.0",
+    "sqlmodel>=0.0.22,<0.1",
+    "apscheduler>=3.10,<4.0",
+    "pydantic-settings>=2.7,<3.0",
+    "pyyaml>=6.0,<7.0",
+]
+
+[project.scripts]
+ryushi = "ryushi.main:run"
+
+[tool.hatch.envs.default]
+dependencies = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "httpx",  # für FastAPI TestClient
+]
+
+[tool.hatch.envs.default.scripts]
+test = "pytest tests/"
+dev = "uvicorn ryushi.main:app --reload --host 127.0.0.1 --port 8765"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
