@@ -87,7 +87,7 @@ jobs:
             ${{ runner.os }}-uv-
 
       - name: Install Dependencies
-        run: uv sync --frozen
+        run: uv sync --frozen --all-extras
 
       - name: Run ruff lint
         if: ${{ inputs.run_lint }}
@@ -132,7 +132,7 @@ jobs:
             ${{ runner.os }}-uv-
 
       - name: Install Dependencies
-        run: uv sync --frozen
+        run: uv sync --frozen --all-extras
 
       - name: Run Tests with Coverage
         run: |
@@ -176,7 +176,7 @@ jobs:
         uses: astral-sh/setup-uv@v5
 
       - name: Install Dependencies
-        run: uv sync --frozen
+        run: uv sync --frozen --all-extras
 
       - name: Run pip-audit
         run: uv run pip-audit
