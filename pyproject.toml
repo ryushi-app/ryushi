@@ -19,19 +19,28 @@ dependencies = [
     "pyyaml>=6.0,<7.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.6",
+    "mypy>=1.13",
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=6.0",
+    "pip-audit>=2.6",
+]
+
 [project.scripts]
 ryushi = "ryushi.main:run"
 
-[tool.hatch.envs.default]
-dependencies = [
-    "pytest>=8.0",
-    "pytest-asyncio>=0.24",
-    "httpx",  # für FastAPI TestClient
-]
-
-[tool.hatch.envs.default.scripts]
-test = "pytest tests/"
-dev = "uvicorn ryushi.main:app --reload --host 127.0.0.1 --port 8765"
-
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
