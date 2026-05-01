@@ -206,7 +206,7 @@ jobs:
 
       - name: Extract Image Metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ inputs.container_registry }}/${{ github.repository }}
           tags: |
