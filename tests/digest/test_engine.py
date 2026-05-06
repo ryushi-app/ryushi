@@ -289,7 +289,7 @@ class TestDigestError:
                 await engine.generate_digest(articles, "Tech")
 
         # The error message may contain the original, but DigestError should not add more
-        error_str = str(exc_info.value)
+        str(exc_info.value)
         # We can't control what the underlying error contains, but we shouldn't log extra secrets
         assert exc_info.value.model is not None  # Has context
         assert exc_info.value.retry_count is not None  # Has context

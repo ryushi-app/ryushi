@@ -1,9 +1,7 @@
 """Tests for prompt building functionality."""
 
-from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
-import pytest
 
 from ryushi.digest.prompts import (
     DEFAULT_SYSTEM_PROMPT,
