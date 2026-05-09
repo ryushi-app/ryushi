@@ -36,6 +36,10 @@ ryushi = "ryushi.main:run"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+addopts = "-m 'not smoke'"
+markers = [
+    "smoke: manual smoke tests requiring external services and credentials",
+]
 
 [tool.ruff]
 line-length = 100
