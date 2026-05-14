@@ -124,15 +124,12 @@ def run():
     print()
 
     uvicorn.run(
-        "ryushi.main:app",
+        "ryushi.main:create_app",
         host=host,
         port=port,
         reload=False,
+        factory=True,
     )
-
-
-# Default app instance
-app = create_app()
 
 
 if __name__ == "__main__":

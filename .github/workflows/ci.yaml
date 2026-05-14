@@ -24,4 +24,4 @@ jobs:
       actions: read
     uses: ./.github/workflows/reusable-python-ci.yaml
     with:
-      run_build_image: false # not yet implemented in ryushi
+      run_build_image: true
