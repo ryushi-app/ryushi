@@ -3,8 +3,6 @@
 import xml.etree.ElementTree as ET
 from datetime import UTC, datetime
 
-import pytest
-
 from ryushi.digest.models import Digest
 from ryushi.feeds.generator import (
     FeedGenerator,
@@ -182,7 +180,7 @@ class TestFeedGenerator:
         ns = {"atom": "http://www.w3.org/2005/Atom"}
 
         links = root.findall("atom:link", ns)
-        self_link = next((l for l in links if l.get("rel") == "self"), None)
+        self_link = next((link for link in links if link.get("rel") == "self"), None)
         assert self_link is not None
         assert self_link.get("href") == "https://example.com/feeds/software-engineering/atom.xml"
 
@@ -211,7 +209,7 @@ class TestFeedGenerator:
 
         entry = root.find("atom:entry", ns)
         links = entry.findall("atom:link", ns)
-        hrefs = [l.get("href") for l in links]
+        hrefs = [link.get("href") for link in links]
 
         # Source URLs should be present as links
         assert "https://source1.com" in hrefs

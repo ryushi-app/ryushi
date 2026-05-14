@@ -1,6 +1,5 @@
 """Tests for feed HTTP server."""
 
-import json
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
