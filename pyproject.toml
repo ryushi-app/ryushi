@@ -21,6 +21,7 @@ dependencies = [
     "starlette>=1.0",
     "aiosqlite>=0.19,<1.0",
     "markdown-it-py>=3.0,<4.0",
+    "croniter>=2.0,<4.0",
     # Security: pin urllib3 to fix CVE-2026-44431, CVE-2026-44432
     "urllib3>=2.7.0",
 ]
@@ -33,6 +34,8 @@ dev = [
     "pytest-asyncio>=0.24",
     "pytest-cov>=6.0",
     "pip-audit>=2.6",
+    "types-PyYAML>=6.0",
+    "types-croniter>=2.0",
 ]
 
 [project.scripts]
@@ -55,3 +58,9 @@ python_version = "3.13"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = [
+    "apscheduler.*",
+]
+ignore_missing_imports = true

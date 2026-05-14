@@ -1,0 +1,37 @@
+# Ryushi Scheduler Configuration
+#
+# This file configures the automatic digest generation schedules.
+# Copy this file to config.yaml and customize for your setup.
+#
+# Schedule format: Standard 5-field cron expression
+# ┌───────────── minute (0-59)
+# │ ┌───────────── hour (0-23)
+# │ │ ┌───────────── day of month (1-31)
+# │ │ │ ┌───────────── month (1-12)
+# │ │ │ │ ┌───────────── day of week (0-6, Sunday=0)
+# │ │ │ │ │
+# * * * * *
+
+categories:
+  # Generate technology digest daily at 6:00 AM
+  technology:
+    schedule: "0 6 * * *"
+
+  # Generate software engineering digest daily at 7:00 AM
+  software-engineering:
+    schedule: "0 7 * * *"
+
+  # Generate science digest weekly on Mondays at 8:00 AM
+  science:
+    schedule: "0 8 * * 1"
+
+  # Generate news digest twice daily at 6:00 AM and 6:00 PM
+  # news:
+  #   schedule: "0 6,18 * * *"
+
+# Note: Category slugs must match your FreshRSS category names
+# (converted to lowercase with spaces replaced by hyphens).
+#
+# For example:
+#   FreshRSS category "Software Engineering" → slug "software-engineering"
+#   FreshRSS category "Technology" → slug "technology"

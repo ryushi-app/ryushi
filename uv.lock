@@ -339,6 +339,19 @@ wheels = [
 ]
 
 [[package]]
+name = "croniter"
+version = "3.0.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "python-dateutil" },
+    { name = "pytz" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/07/ea/98665cd116af6d3c4e79c8dc91bbd9a13746cb3c7d72efbfdef5b720c43b/croniter-3.0.4.tar.gz", hash = "sha256:f9dcd4bdb6c97abedb6f09d6ed3495b13ede4d4544503fa580b6372a56a0c520", size = 54500, upload-time = "2024-10-25T12:22:33.14Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/63/f5/135d0e57e5bdd2f978388d77ee818f1ac5ac584eb48034362770001f4cad/croniter-3.0.4-py2.py3-none-any.whl", hash = "sha256:96e14cdd5dcb479dd48d7db14b53d8434b188dfb9210448bef6f65663524a6f0", size = 23220, upload-time = "2024-10-25T12:22:30.75Z" },
+]
+
+[[package]]
 name = "cyclonedx-python-lib"
 version = "11.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1525,6 +1538,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pytz"
+version = "2026.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ff/46/dd499ec9038423421951e4fad73051febaa13d2df82b4064f87af8b8c0c3/pytz-2026.2.tar.gz", hash = "sha256:0e60b47b29f21574376f218fe21abc009894a2321ea16c6754f3cad6eb7cdd6a", size = 320861, upload-time = "2026-05-04T01:35:29.667Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ec/dd/96da98f892250475bdf2328112d7468abdd4acc7b902b6af23f4ed958ea0/pytz-2026.2-py2.py3-none-any.whl", hash = "sha256:04156e608bee23d3792fd45c94ae47fae1036688e75032eea2e3bf0323d1f126", size = 510141, upload-time = "2026-05-04T01:35:27.408Z" },
+]
+
+[[package]]
 name = "pyyaml"
 version = "6.0.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1771,6 +1793,7 @@ source = { editable = "." }
 dependencies = [
     { name = "aiosqlite" },
     { name = "apscheduler" },
+    { name = "croniter" },
     { name = "fastapi" },
     { name = "feedgen" },
     { name = "httpx" },
@@ -1793,12 +1816,15 @@ dev = [
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
     { name = "ruff" },
+    { name = "types-croniter" },
+    { name = "types-pyyaml" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "aiosqlite", specifier = ">=0.19,<1.0" },
     { name = "apscheduler", specifier = ">=3.10,<4.0" },
+    { name = "croniter", specifier = ">=2.0,<4.0" },
     { name = "fastapi", specifier = ">=0.115,<0.137" },
     { name = "feedgen", specifier = ">=1.0,<2.0" },
     { name = "httpx", specifier = ">=0.28,<0.29" },
@@ -1815,6 +1841,8 @@ requires-dist = [
     { name = "sqlmodel", specifier = ">=0.0.22,<0.1" },
     { name = "starlette", specifier = ">=1.0" },
     { name = "tenacity", specifier = ">=8.2,<10.0" },
+    { name = "types-croniter", marker = "extra == 'dev'", specifier = ">=2.0" },
+    { name = "types-pyyaml", marker = "extra == 'dev'", specifier = ">=6.0" },
     { name = "urllib3", specifier = ">=2.7.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.32,<0.47" },
 ]
@@ -2066,6 +2094,24 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/fd/07/b822e1b307d40e263e8253d2384cf98c51aa2368cc7ba9a07e523a1d964b/typer-0.23.1.tar.gz", hash = "sha256:2070374e4d31c83e7b61362fd859aa683576432fd5b026b060ad6b4cd3b86134", size = 120047, upload-time = "2026-02-13T10:04:30.984Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d5/91/9b286ab899c008c2cb05e8be99814807e7fbbd33f0c0c960470826e5ac82/typer-0.23.1-py3-none-any.whl", hash = "sha256:3291ad0d3c701cbf522012faccfbb29352ff16ad262db2139e6b01f15781f14e", size = 56813, upload-time = "2026-02-13T10:04:32.008Z" },
+]
+
+[[package]]
+name = "types-croniter"
+version = "6.2.2.20260508"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b6/e0/06272cc8dea1d0f0599a150c81e44c4f21270d40cfd10117c2e4fbfa1503/types_croniter-6.2.2.20260508.tar.gz", hash = "sha256:fdbe8984b4a490b2ea446a308fb4d1998214312c90e4b09d6271bc4fa0456e7e", size = 12077, upload-time = "2026-05-08T04:46:30.761Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/23/86/856e2b7795d74ce30e685390ccb61ce0a075b6e4111e88c49fafaca8ed0d/types_croniter-6.2.2.20260508-py3-none-any.whl", hash = "sha256:9038aa3fa264ef16a4e1034f8f8a1fcc7d73da4c56ed1f508e008abab8773bad", size = 9732, upload-time = "2026-05-08T04:46:29.738Z" },
+]
+
+[[package]]
+name = "types-pyyaml"
+version = "6.0.12.20260510"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/36/85/0d9fafce21be112e977a89677f1ce9d1aef921d745b17c758c93e861c11f/types_pyyaml-6.0.12.20260510.tar.gz", hash = "sha256:09c1f1cb65a6eebea1e2e51ccf4918b8288e152909609a35cdb0d805efd125ad", size = 17831, upload-time = "2026-05-10T05:26:28.136Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d3/ad/fd618a218925daada7b8a5e7326e662599fa5fdff4a4c44ab2795bd2d9ca/types_pyyaml-6.0.12.20260510-py3-none-any.whl", hash = "sha256:3492eb9ba4d9d833473214c4d5736cccf5f37d93f5854059721e1c84f785309d", size = 20304, upload-time = "2026-05-10T05:26:26.981Z" },
 ]
 
 [[package]]
