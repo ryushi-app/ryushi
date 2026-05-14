@@ -21,6 +21,8 @@ dependencies = [
     "starlette>=1.0",
     "aiosqlite>=0.19,<1.0",
     "markdown-it-py>=3.0,<4.0",
+    # Security: pin urllib3 to fix CVE-2026-44431, CVE-2026-44432
+    "urllib3>=2.7.0",
 ]
 
 [project.optional-dependencies]
