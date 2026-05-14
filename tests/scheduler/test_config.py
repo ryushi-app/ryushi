@@ -1,7 +1,6 @@
 """Tests for scheduler configuration loading."""
 
 import tempfile
-from pathlib import Path
 
 import pytest
 

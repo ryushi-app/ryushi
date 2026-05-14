@@ -1,9 +1,9 @@
 """Tests for digest scheduler."""
 
+import asyncio
 import tempfile
-from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -263,7 +263,3 @@ class TestDigestSchedulerStatus:
         assert "science" in slugs
 
         await scheduler.stop()
-
-
-# Need to import asyncio for the sleep test
-import asyncio

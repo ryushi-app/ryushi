@@ -1,7 +1,6 @@
 """Tests for scheduler HTTP API."""
 
 import tempfile
-from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
@@ -11,7 +10,7 @@ from httpx import ASGITransport, AsyncClient
 
 from ryushi.feeds.store import FeedStore
 from ryushi.scheduler.api import router, set_scheduler
-from ryushi.scheduler.models import CategorySchedule, JobRun, ScheduleConfig
+from ryushi.scheduler.models import CategorySchedule, ScheduleConfig
 from ryushi.scheduler.scheduler import DigestScheduler
 from ryushi.scheduler.store import JobStore
 

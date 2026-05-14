@@ -6,10 +6,8 @@ This module provides the main application that combines:
 - Job API for manual triggering and monitoring
 """
 
-import asyncio
 import logging
 import os
-import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
 

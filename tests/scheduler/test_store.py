@@ -1,12 +1,10 @@
 """Tests for job store."""
 
 import tempfile
-from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
 
-from ryushi.scheduler.models import JobRun
 from ryushi.scheduler.store import JobStore
 
 
@@ -161,7 +159,7 @@ class TestJobStoreGetLastRun:
 
     async def test_get_last_run_ignores_running(self, store):
         """Test get_last_run ignores running jobs."""
-        run = await store.create_run("technology")
+        await store.create_run("technology")
         # Don't complete it
 
         result = await store.get_last_run("technology")
