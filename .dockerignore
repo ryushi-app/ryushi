@@ -1,0 +1,71 @@
+# Git
+.git/
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+test-results.xml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Development files
+tests/
+.ruff_cache/
+.mypy_cache/
+
+# OpenSpec (development artifacts)
+openspec/
+
+# Local configuration (users should mount their own)
+config.yaml
+*.db
+
+# CI/CD
+.github/
+
+# Claude/AI
+.claude/
+CLAUDE.md
