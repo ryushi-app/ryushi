@@ -19,6 +19,10 @@ dependencies = [
     "pydantic-settings>=2.7,<3.0",
     "pyyaml>=6.0,<7.0",
     "starlette>=1.0",
+    "aiosqlite>=0.19,<1.0",
+    "markdown-it-py>=3.0,<4.0",
+    # Security: pin urllib3 to fix CVE-2026-44431, CVE-2026-44432
+    "urllib3>=2.7.0",
 ]
 
 [project.optional-dependencies]
@@ -33,6 +37,7 @@ dev = [
 
 [project.scripts]
 ryushi = "ryushi.main:run"
+ryushi-feeds = "ryushi.feeds.cli:main"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
