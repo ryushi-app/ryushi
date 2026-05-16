@@ -1,0 +1,39 @@
+services:
+  ryushi:
+    image: ghcr.io/ryushi-app/ryushi:latest
+    container_name: ryushi
+    restart: unless-stopped
+    ports:
+      - "${RYUSHI_PORT:-8000}:8000"
+    environment:
+      # Server configuration
+      - RYUSHI_HOST=0.0.0.0
+      - RYUSHI_PORT=8000
+      - RYUSHI_BASE_URL=${RYUSHI_BASE_URL:-}
+      
+      # Database paths (inside container)
+      - RYUSHI_CONFIG=/data/config.yaml
+      - RYUSHI_JOBS_DB=/data/jobs.db
+      - RYUSHI_FEEDS_DB=/data/feeds.db
+      
+      # FreshRSS credentials
+      - RYUSHI_FRESHRSS_PASSWORD=${RYUSHI_FRESHRSS_PASSWORD:?FreshRSS password is required}
+      
+      # AI provider configuration
+      - RYUSHI_AI_API_KEY=${RYUSHI_AI_API_KEY:?AI API key is required}
+      - RYUSHI_AI_BASE_URL=${RYUSHI_AI_BASE_URL:-https://api.openai.com/v1}
+    volumes:
+      # Persist databases and configuration
+      - ryushi-data:/data
+      # Mount your config file (create from config.yaml.example)
+      - ./config.yaml:/data/config.yaml:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  ryushi-data:
+    name: ryushi-data
