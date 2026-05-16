@@ -13,9 +13,9 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 COPY ryushi/ ./ryushi/
 
-# Install the package with dependencies (production only, no dev deps)
+# Install dependencies and the package itself (production only, no dev deps)
 # Creates a virtual environment at .venv
-RUN uv sync --frozen --no-dev
+RUN uv sync --frozen --no-dev --no-editable
 
 # Stage 2: Runtime image
 FROM python:3.13-slim AS runtime
