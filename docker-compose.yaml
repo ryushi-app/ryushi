@@ -17,7 +17,9 @@ services:
       - RYUSHI_FEEDS_DB=/data/feeds.db
       
       # FreshRSS credentials
-      - RYUSHI_FRESHRSS_PASSWORD=${RYUSHI_FRESHRSS_PASSWORD:?FreshRSS password is required}
+      - FRESHRSS_URL=${FRESHRSS_URL:?FreshRSS URL is required}
+      - FRESHRSS_USERNAME=${FRESHRSS_USERNAME:?FreshRSS username is required}
+      - FRESHRSS_PASSWORD=${FRESHRSS_PASSWORD:?FreshRSS password is required}
       
       # AI provider configuration
       - RYUSHI_AI_API_KEY=${RYUSHI_AI_API_KEY:?AI API key is required}
