@@ -336,3 +336,62 @@ class TestContextTruncation:
         user_message = call_args.kwargs["messages"][1]["content"]
         # Should mention truncation
         assert "100 articles" in user_message or "Showing" in user_message
+
+
+class TestCustomAPIProvider:
+    """Tests for custom API provider configuration."""
+
+    async def test_custom_base_url_passed_to_litellm(self):
+        """Test that custom base_url is passed as api_base to LiteLLM."""
+        config = DigestConfig(
+            model="custom-model",
+            base_url="https://api.custom.example.com/v1",
+            api_key="custom-key-123"
+        )
+        engine = DigestEngine(config)
+        articles = [make_mock_article()]
+
+        mock_response = make_mock_response("Custom API response")
+
+        with patch("ryushi.digest.engine.litellm.acompletion", new_callable=AsyncMock) as mock_ai:
+            mock_ai.return_value = mock_response
+            digest = await engine.generate_digest(articles, "Tech")
+
+        assert digest is not None
+        call_args = mock_ai.call_args
+        assert call_args.kwargs["api_base"] == "https://api.custom.example.com/v1"
+        assert call_args.kwargs["api_key"] == "custom-key-123"
+        assert call_args.kwargs["model"] == "custom-model"
+
+    async def test_api_key_passed_when_configured(self):
+        """Test that API key is passed to LiteLLM when configured."""
+        config = DigestConfig(
+            model="test-model",
+            api_key="test-api-key-xyz"
+        )
+        engine = DigestEngine(config)
+        articles = [make_mock_article()]
+
+        mock_response = make_mock_response("Response")
+
+        with patch("ryushi.digest.engine.litellm.acompletion", new_callable=AsyncMock) as mock_ai:
+            mock_ai.return_value = mock_response
+            await engine.generate_digest(articles, "Tech")
+
+        call_args = mock_ai.call_args
+        assert call_args.kwargs["api_key"] == "test-api-key-xyz"
+
+    async def test_base_url_not_passed_when_empty(self):
+        """Test that api_base is not passed when base_url is None."""
+        config = DigestConfig(model="test-model", base_url=None)
+        engine = DigestEngine(config)
+        articles = [make_mock_article()]
+
+        mock_response = make_mock_response("Response")
+
+        with patch("ryushi.digest.engine.litellm.acompletion", new_callable=AsyncMock) as mock_ai:
+            mock_ai.return_value = mock_response
+            await engine.generate_digest(articles, "Tech")
+
+        call_args = mock_ai.call_args
+        assert "api_base" not in call_args.kwargs
