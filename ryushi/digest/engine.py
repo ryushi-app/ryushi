@@ -219,6 +219,9 @@ class DigestEngine:
             if self.config.base_url:
                 kwargs["api_base"] = self.config.base_url
 
+            if self.config.api_key:
+                kwargs["api_key"] = self.config.api_key
+
             response = await litellm.acompletion(**kwargs)
 
             # Extract content from response

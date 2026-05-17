@@ -23,7 +23,8 @@ services:
       
       # AI provider configuration
       - RYUSHI_AI_API_KEY=${RYUSHI_AI_API_KEY:?AI API key is required}
-      - RYUSHI_AI_BASE_URL=${RYUSHI_AI_BASE_URL:-https://api.openai.com/v1}
+      - RYUSHI_AI_BASE_URL=${RYUSHI_AI_BASE_URL:-}
+      - RYUSHI_AI_MODEL=${RYUSHI_AI_MODEL:-gpt-4.1-mini}
     volumes:
       # Persist databases and configuration
       - ryushi-data:/data
