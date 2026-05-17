@@ -69,7 +69,7 @@ class DigestEngine:
     prompts, models, and parameters.
 
     Example:
-        config = DigestConfig(model="gpt-4o-mini", temperature=0.7)
+        config = DigestConfig(model="gpt-4.1-mini", temperature=0.7)
         engine = DigestEngine(config)
         digest = await engine.generate_digest(articles, "Technology")
     """

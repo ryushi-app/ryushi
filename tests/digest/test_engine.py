@@ -37,10 +37,15 @@ def make_mock_response(content: str) -> MagicMock:
 class TestDigestEngineInit:
     """Tests for DigestEngine initialization."""
 
-    def test_default_config(self):
+    def test_default_config(self, monkeypatch):
         """Engine uses default config when none provided."""
+        # Clear env vars to test true defaults
+        monkeypatch.delenv("RYUSHI_AI_MODEL", raising=False)
+        monkeypatch.delenv("RYUSHI_AI_BASE_URL", raising=False)
+        monkeypatch.delenv("RYUSHI_AI_API_KEY", raising=False)
+
         engine = DigestEngine()
-        assert engine.config.model == "gpt-4o-mini"
+        assert engine.config.model == "gpt-4.1-mini"
         assert engine.config.temperature == 0.7
 
     def test_custom_config(self):
@@ -60,8 +65,13 @@ class TestGenerateDigest:
         result = await engine.generate_digest([], "Technology")
         assert result is None
 
-    async def test_successful_digest_generation(self):
+    async def test_successful_digest_generation(self, monkeypatch):
         """Generates digest successfully with mocked LiteLLM."""
+        # Clear env vars to test true defaults
+        monkeypatch.delenv("RYUSHI_AI_MODEL", raising=False)
+        monkeypatch.delenv("RYUSHI_AI_BASE_URL", raising=False)
+        monkeypatch.delenv("RYUSHI_AI_API_KEY", raising=False)
+
         engine = DigestEngine()
         articles = [
             make_mock_article(title="Article 1", url="https://example.com/1"),
@@ -82,7 +92,7 @@ class TestGenerateDigest:
         assert isinstance(digest, Digest)
         assert digest.category_name == "Technology"
         assert digest.article_count == 2
-        assert digest.model_used == "gpt-4o-mini"
+        assert digest.model_used == "gpt-4.1-mini"
         assert "summary" in digest.summary.lower() or len(digest.summary) > 0
 
     async def test_digest_extracts_source_urls(self):

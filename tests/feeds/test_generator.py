@@ -89,7 +89,7 @@ class TestDigestToEntry:
             summary="# Summary\n\nThis is a test digest.",
             article_count=5,
             source_urls=["https://example.com/1", "https://example.com/2"],
-            model_used="gpt-4o-mini",
+            model_used="gpt-4.1-mini",
         )
 
         entry = digest_to_entry(digest)

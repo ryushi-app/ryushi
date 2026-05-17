@@ -22,6 +22,9 @@ CHARS_PER_TOKEN = 4
 
 # Default context window sizes for common models
 MODEL_CONTEXT_WINDOWS = {
+    "gpt-4.1": 1047576,
+    "gpt-4.1-mini": 1047576,
+    "gpt-4.1-nano": 1047576,
     "gpt-4o": 128000,
     "gpt-4o-mini": 128000,
     "gpt-4-turbo": 128000,
@@ -30,6 +33,8 @@ MODEL_CONTEXT_WINDOWS = {
     "claude-3-opus": 200000,
     "claude-3-sonnet": 200000,
     "claude-3-haiku": 200000,
+    "claude-sonnet-4": 200000,
+    "claude-opus-4": 200000,
 }
 
 # Default context window for unknown models
@@ -87,7 +92,7 @@ def format_system_prompt(template: str, language: str = "English") -> str:
 def build_prompt(
     articles: list["Article"],
     category_name: str,
-    model: str = "gpt-4o-mini",
+    model: str = "gpt-4.1-mini",
     max_context_ratio: float = 0.8,
 ) -> tuple[str, int]:
     """Build a user prompt from articles for digest generation.

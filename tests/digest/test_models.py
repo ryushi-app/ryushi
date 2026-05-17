@@ -11,14 +11,20 @@ from ryushi.digest.models import Digest, DigestConfig
 class TestDigestConfig:
     """Tests for DigestConfig model."""
 
-    def test_default_values(self):
+    def test_default_values(self, monkeypatch):
         """DigestConfig has sensible defaults."""
+        # Clear env vars to test true defaults
+        monkeypatch.delenv("RYUSHI_AI_MODEL", raising=False)
+        monkeypatch.delenv("RYUSHI_AI_BASE_URL", raising=False)
+        monkeypatch.delenv("RYUSHI_AI_API_KEY", raising=False)
+
         config = DigestConfig()
-        assert config.model == "gpt-4o-mini"
+        assert config.model == "gpt-4.1-mini"
         assert config.max_tokens == 1500
         assert config.temperature == 0.7
         assert config.timeout == 60.0
         assert config.base_url is None
+        assert config.api_key is None
         assert config.system_prompt is None
         assert config.language == "English"
 
@@ -68,12 +74,12 @@ class TestDigest:
             category_name="Technology",
             summary="This is a test summary.",
             article_count=10,
-            model_used="gpt-4o-mini",
+            model_used="gpt-4.1-mini",
         )
         assert digest.category_name == "Technology"
         assert digest.summary == "This is a test summary."
         assert digest.article_count == 10
-        assert digest.model_used == "gpt-4o-mini"
+        assert digest.model_used == "gpt-4.1-mini"
 
     def test_digest_auto_generates_id(self):
         """Digest auto-generates UUID if not provided."""
@@ -154,7 +160,7 @@ class TestDigest:
             summary="Test summary",
             article_count=10,
             source_urls=["https://example.com"],
-            model_used="gpt-4o-mini",
+            model_used="gpt-4.1-mini",
         )
         data = digest.model_dump()
         assert data["id"] == "test-uuid"
@@ -162,4 +168,4 @@ class TestDigest:
         assert data["summary"] == "Test summary"
         assert data["article_count"] == 10
         assert data["source_urls"] == ["https://example.com"]
-        assert data["model_used"] == "gpt-4o-mini"
+        assert data["model_used"] == "gpt-4.1-mini"

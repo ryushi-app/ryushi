@@ -84,7 +84,7 @@ def make_digest(category_name: str = "Technology") -> Digest:
         summary="# Summary\n\nTest digest content.",
         article_count=5,
         source_urls=["https://example.com/1"],
-        model_used="gpt-4o-mini",
+        model_used="gpt-4.1-mini",
     )
 
 
