@@ -346,7 +346,7 @@ class TestCustomAPIProvider:
         config = DigestConfig(
             model="custom-model",
             base_url="https://api.custom.example.com/v1",
-            api_key="custom-key-123"
+            api_key="custom-key-123",
         )
         engine = DigestEngine(config)
         articles = [make_mock_article()]
@@ -365,10 +365,7 @@ class TestCustomAPIProvider:
 
     async def test_api_key_passed_when_configured(self):
         """Test that API key is passed to LiteLLM when configured."""
-        config = DigestConfig(
-            model="test-model",
-            api_key="test-api-key-xyz"
-        )
+        config = DigestConfig(model="test-model", api_key="test-api-key-xyz")
         engine = DigestEngine(config)
         articles = [make_mock_article()]
 
