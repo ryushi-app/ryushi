@@ -13,7 +13,9 @@ from pathlib import Path
 
 from fastapi import FastAPI
 
-from ryushi.feeds.server import create_app as create_feeds_app
+from ryushi.feeds.store import FeedStore
+from ryushi.feeds.generator import FeedGenerator
+from ryushi.feeds.server import create_feeds_router
 from ryushi.scheduler import DigestScheduler, scheduler_router, set_scheduler
 
 logger = logging.getLogger(__name__)
@@ -75,8 +77,13 @@ def create_app(
         lifespan=lifespan,
     )
 
-    # Create feeds sub-application and include its routes
-    feeds_app = create_feeds_app(db_path=feeds_db_path, base_url=base_url)
+    # Create feed store and generator
+    feed_store = FeedStore(db_path=feeds_db_path)
+    feed_generator = FeedGenerator(base_url=base_url)
+
+    # Include feeds router
+    feeds_router = create_feeds_router(feed_store, feed_generator)
+    app.include_router(feeds_router)
 
     # Include scheduler routes
     app.include_router(scheduler_router)
