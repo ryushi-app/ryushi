@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request, Response
 
 from ryushi.feeds.generator import FeedGenerator
 from ryushi.feeds.models import FeedIndex
@@ -23,6 +23,92 @@ logger = logging.getLogger(__name__)
 # Content types
 CONTENT_TYPE_ATOM = "application/atom+xml"
 CONTENT_TYPE_JSON = "application/json"
+
+
+def create_feeds_router(
+    store: FeedStore,
+    generator: FeedGenerator,
+) -> APIRouter:
+    """Create a router for feeds endpoints.
+
+    Args:
+        store: FeedStore instance for persistence.
+        generator: FeedGenerator instance for feed generation.
+
+    Returns:
+        Configured APIRouter with /feeds prefix.
+    """
+    router = APIRouter(prefix="/feeds", tags=["feeds"])
+
+    async def get_store() -> FeedStore:
+        """Dependency to get the FeedStore instance."""
+        return store
+
+    async def get_generator() -> FeedGenerator:
+        """Dependency to get the FeedGenerator instance."""
+        return generator
+
+    @router.get("", response_class=Response)
+    async def list_feeds(
+        request: Request,
+        store: Annotated[FeedStore, Depends(get_store)],
+    ) -> Response:
+        """Feed discovery endpoint listing all available feeds.
+
+        Returns JSON array of feed metadata objects with:
+        - category: Human-readable category name
+        - slug: URL-safe category slug
+        - url: Full URL to the Atom feed
+        - last_updated: Timestamp of most recent entry
+        - item_count: Number of entries in the feed
+        """
+        base_url = generator.base_url or str(request.base_url).rstrip("/")
+        categories = await store.list_categories(base_url=base_url)
+
+        feed_index = FeedIndex(feeds=categories)
+
+        return Response(
+            content=feed_index.model_dump_json(),
+            media_type=CONTENT_TYPE_JSON,
+        )
+
+    @router.get("/{category_slug}/atom.xml", response_class=Response)
+    async def get_feed(
+        category_slug: str,
+        store: Annotated[FeedStore, Depends(get_store)],
+        generator: Annotated[FeedGenerator, Depends(get_generator)],
+    ) -> Response:
+        """Serve Atom feed for a specific category.
+
+        Args:
+            category_slug: URL-safe category identifier.
+
+        Returns:
+            Atom XML feed with Content-Type: application/atom+xml
+
+        Raises:
+            HTTPException: 404 if category not found.
+        """
+        # Check if category exists
+        if not await store.category_exists(category_slug):
+            raise HTTPException(
+                status_code=404,
+                detail=f"Feed not found: '{category_slug}'. Use GET /feeds to see available feeds.",
+            )
+
+        entries = await store.get_entries(category_slug)
+
+        # Convert slug back to category name for display
+        category_name = category_slug.replace("-", " ").title()
+
+        xml = generator.generate_feed(entries, category_name)
+
+        return Response(
+            content=xml,
+            media_type=CONTENT_TYPE_ATOM,
+        )
+
+    return router
 
 
 def create_app(
@@ -99,65 +185,9 @@ def create_app(
                 status_code=500,
             )
 
-    @app.get("/feeds", response_class=Response)
-    async def list_feeds(
-        request: Request,
-        store: Annotated[FeedStore, Depends(get_store)],
-    ) -> Response:
-        """Feed discovery endpoint listing all available feeds.
-
-        Returns JSON array of feed metadata objects with:
-        - category: Human-readable category name
-        - slug: URL-safe category slug
-        - url: Full URL to the Atom feed
-        - last_updated: Timestamp of most recent entry
-        - item_count: Number of entries in the feed
-        """
-        base_url = app.state.base_url or str(request.base_url).rstrip("/")
-        categories = await store.list_categories(base_url=base_url)
-
-        feed_index = FeedIndex(feeds=categories)
-
-        return Response(
-            content=feed_index.model_dump_json(),
-            media_type=CONTENT_TYPE_JSON,
-        )
-
-    @app.get("/feeds/{category_slug}/atom.xml", response_class=Response)
-    async def get_feed(
-        category_slug: str,
-        store: Annotated[FeedStore, Depends(get_store)],
-        generator: Annotated[FeedGenerator, Depends(get_generator)],
-    ) -> Response:
-        """Serve Atom feed for a specific category.
-
-        Args:
-            category_slug: URL-safe category identifier.
-
-        Returns:
-            Atom XML feed with Content-Type: application/atom+xml
-
-        Raises:
-            HTTPException: 404 if category not found.
-        """
-        # Check if category exists
-        if not await store.category_exists(category_slug):
-            raise HTTPException(
-                status_code=404,
-                detail=f"Feed not found: '{category_slug}'. Use GET /feeds to see available feeds.",
-            )
-
-        entries = await store.get_entries(category_slug)
-
-        # Convert slug back to category name for display
-        category_name = category_slug.replace("-", " ").title()
-
-        xml = generator.generate_feed(entries, category_name)
-
-        return Response(
-            content=xml,
-            media_type=CONTENT_TYPE_ATOM,
-        )
+    # Include feeds router
+    feeds_router = create_feeds_router(app.state.store, app.state.generator)
+    app.include_router(feeds_router)
 
     return app
 

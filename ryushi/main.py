@@ -75,11 +75,8 @@ def create_app(
         lifespan=lifespan,
     )
 
-    # Create feeds sub-application
+    # Create feeds sub-application and include its routes
     feeds_app = create_feeds_app(db_path=feeds_db_path, base_url=base_url)
-
-    # Mount feeds routes
-    app.mount("/feeds", feeds_app, name="feeds")
 
     # Include scheduler routes
     app.include_router(scheduler_router)
