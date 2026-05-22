@@ -351,6 +351,77 @@ class FreshRSSClient:
         )
         return articles
 
+    async def mark_as_read(self, article_ids: list[str]) -> None:
+        """Mark articles as read in FreshRSS.
+
+        Uses the FreshRSS edit-tag API endpoint to mark articles with the
+        user/-/state/com.google/read tag. Batches requests if needed (max 50 IDs per request).
+
+        Errors during marking are logged as warnings but do not raise exceptions,
+        allowing the job to continue if marking fails.
+
+        Args:
+            article_ids: List of article IDs to mark as read.
+        """
+        if not article_ids:
+            logger.debug("No articles to mark as read")
+            return
+
+        # Batch articles into chunks of 50 (FreshRSS API limit)
+        batch_size = 50
+        for i in range(0, len(article_ids), batch_size):
+            batch = article_ids[i : i + batch_size]
+
+            try:
+                await self._mark_as_read_batch(batch)
+            except Exception as e:
+                logger.warning(
+                    "Failed to mark %d articles as read: %s",
+                    len(batch),
+                    str(e),
+                )
+                # Continue processing other batches on failure
+
+    async def _mark_as_read_batch(self, article_ids: list[str]) -> None:
+        """Mark a batch of articles as read.
+
+        Makes a POST request to the edit-tag endpoint with the article IDs
+        and the read tag.
+
+        Args:
+            article_ids: Batch of article IDs (max 50).
+
+        Raises:
+            AuthError: If authentication fails.
+            FetchError: For network or server errors.
+            RateLimitError: If rate limited.
+        """
+        # Build the request payload for edit-tag endpoint
+        # Format: POST /reader/api/0/edit-tag?a=<article_id>&a=<article_id>&t=<tag>
+        params: dict[str, Any] = {
+            "a": article_ids,  # httpx handles list params correctly
+            "t": "user/-/state/com.google/read",  # The read tag
+        }
+
+        try:
+            await self._request(
+                "POST",
+                "/api/greader.php/reader/api/0/edit-tag",
+                params=params,
+                retry_on_401=True,
+            )
+            logger.debug("Marked %d articles as read", len(article_ids))
+
+        except (AuthError, RateLimitError):
+            # Re-raise auth and rate limit errors - these are critical
+            raise
+        except FetchError as e:
+            # Log fetch errors but don't re-raise
+            logger.warning(
+                "FreshRSS error marking articles as read: %s",
+                str(e),
+            )
+
     def _parse_article(
         self, item: dict[str, Any], default_category_id: str | None
     ) -> Article | None:

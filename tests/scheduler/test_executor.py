@@ -46,6 +46,7 @@ def mock_freshrss_client():
     client = MagicMock()
     client.get_categories = AsyncMock(return_value=[])
     client.get_unread_items = AsyncMock(return_value=[])
+    client.mark_as_read = AsyncMock(return_value=None)
     return client
 
 

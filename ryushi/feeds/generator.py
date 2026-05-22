@@ -61,7 +61,7 @@ def render_markdown_to_html(markdown_text: str) -> str:
     return str(md.render(markdown_text))
 
 
-def digest_to_entry(digest: Digest) -> FeedEntry:
+def digest_to_entry(digest: Digest, favicon_url: str | None = None) -> FeedEntry:
     """Convert a Digest object to a FeedEntry.
 
     Creates a FeedEntry with:
@@ -70,9 +70,11 @@ def digest_to_entry(digest: Digest) -> FeedEntry:
     - Title including category and date
     - HTML content from markdown summary
     - Source URLs preserved
+    - Favicon URL if provided
 
     Args:
         digest: The Digest object to convert.
+        favicon_url: Optional favicon URL for the feed.
 
     Returns:
         FeedEntry ready for storage and feed generation.
@@ -89,6 +91,7 @@ def digest_to_entry(digest: Digest) -> FeedEntry:
         published=digest.generated_at,
         content_html=content_html,
         source_urls=digest.source_urls,
+        favicon_url=favicon_url,
     )
 
 
@@ -114,6 +117,7 @@ class FeedGenerator:
         self,
         entries: list[FeedEntry],
         category_name: str,
+        favicon: str | None = None,
     ) -> str:
         """Generate an Atom 1.0 feed from a list of entries.
 
@@ -121,11 +125,13 @@ class FeedGenerator:
         - Feed id as URN based on category slug
         - Feed title as "{category} - Ryushi Digest"
         - Feed updated as most recent entry timestamp
+        - Feed icon if favicon URL is provided
         - Each entry with proper id, title, published, content, and links
 
         Args:
             entries: List of FeedEntry objects to include.
             category_name: Human-readable category name.
+            favicon: Optional URL for the feed icon (Atom icon element).
 
         Returns:
             Atom 1.0 XML as a string.
@@ -142,6 +148,10 @@ class FeedGenerator:
             fg.id(feed_id)
             fg.title(f"{category_name} - Ryushi Digest")
             fg.author({"name": self.author_name})
+
+            # Set feed icon/favicon if provided
+            if favicon:
+                fg.icon(favicon)
 
             # Set feed link
             feed_url = f"{self.base_url}/feeds/{category_slug}/atom.xml"

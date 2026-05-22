@@ -102,6 +102,9 @@ class TestParseConfig:
         config = parse_config(raw)
         assert len(config.categories) == 1
         assert config.categories["tech"].schedule == "0 6 * * *"
+        assert config.categories["tech"].language == "German"  # Default language
+        assert config.categories["tech"].prompt is None
+        assert config.categories["tech"].favicon is None
 
     def test_parse_empty_categories(self):
         """Test parsing config with no categories."""
@@ -158,6 +161,78 @@ class TestParseConfig:
         raw = {"categories": "not a dict"}
         config = parse_config(raw)
         assert len(config.categories) == 0
+
+    def test_parse_category_with_language(self):
+        """Test parsing category with explicit language."""
+        raw = {
+            "categories": {
+                "tech": {
+                    "schedule": "0 6 * * *",
+                    "language": "English",
+                }
+            }
+        }
+        config = parse_config(raw)
+        assert config.categories["tech"].language == "English"
+
+    def test_parse_category_with_prompt(self):
+        """Test parsing category with custom prompt."""
+        custom_prompt = "Summarize articles in technical detail"
+        raw = {
+            "categories": {
+                "tech": {
+                    "schedule": "0 6 * * *",
+                    "prompt": custom_prompt,
+                }
+            }
+        }
+        config = parse_config(raw)
+        assert config.categories["tech"].prompt == custom_prompt
+
+    def test_parse_category_with_favicon(self):
+        """Test parsing category with favicon URL."""
+        favicon_url = "/static/tech.png"
+        raw = {
+            "categories": {
+                "tech": {
+                    "schedule": "0 6 * * *",
+                    "favicon": favicon_url,
+                }
+            }
+        }
+        config = parse_config(raw)
+        assert config.categories["tech"].favicon == favicon_url
+
+    def test_parse_category_with_all_options(self):
+        """Test parsing category with all configuration options."""
+        custom_prompt = "Summarize in German"
+        favicon_url = "https://example.com/icon.png"
+        raw = {
+            "categories": {
+                "tech": {
+                    "schedule": "0 6 * * *",
+                    "language": "German",
+                    "prompt": custom_prompt,
+                    "favicon": favicon_url,
+                }
+            }
+        }
+        config = parse_config(raw)
+        cat = config.categories["tech"]
+        assert cat.schedule == "0 6 * * *"
+        assert cat.language == "German"
+        assert cat.prompt == custom_prompt
+        assert cat.favicon == favicon_url
+
+    def test_parse_default_language_is_german(self):
+        """Test that default language is German."""
+        raw = {
+            "categories": {
+                "tech": {"schedule": "0 6 * * *"},
+            }
+        }
+        config = parse_config(raw)
+        assert config.categories["tech"].language == "German"
 
 
 class TestGetCategorySlugs:

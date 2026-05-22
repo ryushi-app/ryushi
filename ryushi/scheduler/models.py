@@ -59,14 +59,30 @@ class CategorySchedule(BaseModel):
     schedule: str
 
 
+class CategoryConfig(BaseModel):
+    """Configuration for a single category including digest and feed options.
+
+    Attributes:
+        schedule: Cron expression (e.g., "0 6 * * *").
+        language: Language for digest output (e.g., "German", "English"). Defaults to "German".
+        prompt: Custom system prompt template for digest generation (optional).
+        favicon: URL for the category's feed icon (optional).
+    """
+
+    schedule: str
+    language: str = "German"
+    prompt: str | None = None
+    favicon: str | None = None
+
+
 class ScheduleConfig(BaseModel):
     """Configuration for all category schedules.
 
     Attributes:
-        categories: Mapping of category slug to schedule configuration.
+        categories: Mapping of category slug to category configuration.
     """
 
-    categories: dict[str, CategorySchedule] = Field(default_factory=dict)
+    categories: dict[str, CategoryConfig] = Field(default_factory=dict)
 
 
 class JobTriggerResponse(BaseModel):

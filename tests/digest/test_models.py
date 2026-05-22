@@ -26,7 +26,7 @@ class TestDigestConfig:
         assert config.base_url is None
         assert config.api_key is None
         assert config.system_prompt is None
-        assert config.language == "English"
+        assert config.language == "German"
 
     def test_custom_values(self):
         """DigestConfig accepts custom values."""

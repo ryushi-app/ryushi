@@ -49,7 +49,13 @@ class JobExecutor:
         self.freshrss_client = freshrss_client or FreshRSSClient()
         self.digest_engine = DigestEngine(digest_config or DigestConfig())
 
-    async def execute_job(self, category_slug: str) -> JobRun:
+    async def execute_job(
+        self,
+        category_slug: str,
+        language: str | None = None,
+        custom_prompt: str | None = None,
+        favicon: str | None = None,
+    ) -> JobRun:
         """Execute a digest generation job for a category.
 
         Pipeline:
@@ -57,10 +63,14 @@ class JobExecutor:
         2. Fetch unread articles from FreshRSS
         3. Generate digest using DigestEngine (if articles exist)
         4. Store feed entry (if digest generated)
-        5. Complete job run with status 'success' or 'failed'
+        5. Mark articles as read in FreshRSS
+        6. Complete job run with status 'success' or 'failed'
 
         Args:
             category_slug: The category slug to process.
+            language: Optional language override for digest generation.
+            custom_prompt: Optional custom prompt override for digest generation.
+            favicon: Optional favicon URL for feed generation.
 
         Returns:
             The completed JobRun record.
@@ -80,7 +90,12 @@ class JobExecutor:
 
         try:
             # Step 1: Fetch articles
-            article_count = await self._fetch_and_process(category_slug)
+            article_count = await self._fetch_and_process(
+                category_slug,
+                language=language,
+                custom_prompt=custom_prompt,
+                favicon=favicon,
+            )
 
             # Calculate duration
             finished_at = datetime.now(UTC)
@@ -125,11 +140,20 @@ class JobExecutor:
             history = await self.job_store.get_history(category_slug, limit=1)
             return history[0] if history else job_run
 
-    async def _fetch_and_process(self, category_slug: str) -> int:
+    async def _fetch_and_process(
+        self,
+        category_slug: str,
+        language: str | None = None,
+        custom_prompt: str | None = None,
+        favicon: str | None = None,
+    ) -> int:
         """Fetch articles and process them into a digest.
 
         Args:
             category_slug: The category slug to process.
+            language: Optional language override for digest generation.
+            custom_prompt: Optional custom prompt override for digest generation.
+            favicon: Optional favicon URL for feed generation.
 
         Returns:
             Number of articles processed.
@@ -169,21 +193,35 @@ class JobExecutor:
             category_slug,
         )
 
-        # Generate digest
-        digest = await self.digest_engine.generate_digest(articles, category.name)
+        # Generate digest with optional language and prompt overrides
+        digest = await self.digest_engine.generate_digest(
+            articles,
+            category.name,
+            language=language,
+            custom_prompt=custom_prompt,
+        )
 
         if digest is None:
             logger.warning("No digest generated for category '%s'", category_slug)
             return article_count
 
-        # Convert to feed entry and store
-        feed_entry = digest_to_entry(digest)
+        # Convert to feed entry and store with favicon
+        feed_entry = digest_to_entry(digest, favicon_url=favicon)
         await self.feed_store.add_entry(feed_entry)
 
         logger.info(
             "Stored feed entry for category '%s' (digest_id=%s)",
             category_slug,
             digest.id,
+        )
+
+        # Mark articles as read in FreshRSS
+        article_ids = [article.id for article in articles]
+        await self.freshrss_client.mark_as_read(article_ids)
+        logger.debug(
+            "Marked %d articles as read for category '%s'",
+            len(article_ids),
+            category_slug,
         )
 
         return article_count

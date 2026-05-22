@@ -1,6 +1,6 @@
 # Ryushi Scheduler Configuration
 #
-# This file configures the automatic digest generation schedules.
+# This file configures the automatic digest generation schedules and per-category options.
 # Copy this file to config.yaml and customize for your setup.
 #
 # Schedule format: Standard 5-field cron expression
@@ -13,13 +13,24 @@
 # * * * * *
 
 categories:
-  # Generate technology digest daily at 6:00 AM
+  # Generate technology digest daily at 6:00 AM (German, uses default prompt)
   technology:
     schedule: "0 6 * * *"
+    # Optional: language for digest output (default: German)
+    language: "German"
+    # Optional: custom system prompt template for digest generation
+    # prompt: |
+    #   Fasse die folgenden Artikel prägnant in {language} zusammen.
+    #   Struktur: ein Einleitungssatz zu den Hauptthemen, dann Stichpunkte pro Artikel.
+    # Optional: favicon URL for the feed (relative or absolute URL)
+    # favicon: "/static/tech.png"
 
   # Generate software engineering digest daily at 7:00 AM
   software-engineering:
     schedule: "0 7 * * *"
+    # Example with custom language and favicon
+    # language: "English"
+    # favicon: "https://cdn.example.com/icons/engineering.png"
 
   # Generate science digest weekly on Mondays at 8:00 AM
   science:
@@ -28,7 +39,35 @@ categories:
   # Generate news digest twice daily at 6:00 AM and 6:00 PM
   # news:
   #   schedule: "0 6,18 * * *"
+  #   language: "German"
 
+# Configuration Options
+# ─────────────────────
+#
+# Each category supports:
+#
+#   schedule (required):
+#     Standard cron expression for when to generate the digest.
+#     Example: "0 6 * * *" = daily at 6:00 AM
+#
+#   language (optional, default: German):
+#     Language for digest output. Appears in the system prompt sent to the AI.
+#     Common values: "German", "English", "French", "Spanish", etc.
+#
+#   prompt (optional):
+#     Custom system prompt template for digest generation. Must include {language}
+#     placeholder to specify where the language should be inserted.
+#     If not specified, uses the default prompt template.
+#     Example:
+#       prompt: |
+#         You are a news summarizer. Write a summary in {language}.
+#         Keep it concise and structured.
+#
+#   favicon (optional):
+#     URL to the feed icon (favicon) displayed by feed readers.
+#     Can be relative (e.g., "/static/icon.png") or absolute (e.g., "https://example.com/icon.png").
+#     If not specified, no icon is displayed.
+#
 # Note: Category slugs must match your FreshRSS category names
 # (converted to lowercase with spaces replaced by hyphens).
 #

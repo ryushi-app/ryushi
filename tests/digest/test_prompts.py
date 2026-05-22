@@ -68,9 +68,9 @@ class TestFormatSystemPrompt:
     """Tests for system prompt formatting."""
 
     def test_default_language(self):
-        """Formats with default English language."""
+        """Formats with default German language."""
         result = format_system_prompt(DEFAULT_SYSTEM_PROMPT)
-        assert "in English" in result
+        assert "in German" in result
 
     def test_custom_language(self):
         """Formats with custom language."""

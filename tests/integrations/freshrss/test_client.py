@@ -461,3 +461,112 @@ class TestReadOnlyBehavior:
         assert call_args[1]["params"]["xt"] == "user/-/state/com.google/read"
         # Verify we're not making any POST requests that could modify state
         assert call_args[0][0] == "GET"
+
+
+class TestMarkAsRead:
+    """Tests for marking articles as read."""
+
+    async def test_mark_single_article_as_read(self, mock_env):
+        """Client marks a single article as read."""
+        client = FreshRSSClient()
+        client._auth_token = "valid-token"
+
+        with patch.object(httpx.AsyncClient, "request", new_callable=AsyncMock) as mock_req:
+            mock_req.return_value = make_response(200, json={})
+            await client.mark_as_read(["tag:google.com,2005:reader/item/123"])
+
+        call_args = mock_req.call_args
+        # Verify POST to edit-tag endpoint
+        assert call_args[0][0] == "POST"
+        assert "edit-tag" in call_args[0][1]
+        # Verify read tag is used
+        assert call_args[1]["params"]["t"] == "user/-/state/com.google/read"
+
+    async def test_mark_multiple_articles_as_read(self, mock_env):
+        """Client marks multiple articles as read in one request."""
+        client = FreshRSSClient()
+        client._auth_token = "valid-token"
+
+        article_ids = [
+            "tag:google.com,2005:reader/item/123",
+            "tag:google.com,2005:reader/item/456",
+            "tag:google.com,2005:reader/item/789",
+        ]
+
+        with patch.object(httpx.AsyncClient, "request", new_callable=AsyncMock) as mock_req:
+            mock_req.return_value = make_response(200, json={})
+            await client.mark_as_read(article_ids)
+
+        call_args = mock_req.call_args
+        assert call_args[0][0] == "POST"
+        assert "edit-tag" in call_args[0][1]
+
+    async def test_mark_as_read_empty_list(self, mock_env):
+        """Client does not make request for empty article list."""
+        client = FreshRSSClient()
+        client._auth_token = "valid-token"
+
+        with patch.object(httpx.AsyncClient, "request", new_callable=AsyncMock) as mock_req:
+            await client.mark_as_read([])
+
+        # Should not have made any HTTP request
+        mock_req.assert_not_called()
+
+    async def test_mark_as_read_batch_chunking(self, mock_env):
+        """Client batches requests for large article lists (max 50 per request)."""
+        client = FreshRSSClient()
+        client._auth_token = "valid-token"
+
+        # Create 150 article IDs (will be split into 3 batches of 50)
+        article_ids = [f"tag:google.com,2005:reader/item/{i}" for i in range(150)]
+
+        with patch.object(httpx.AsyncClient, "request", new_callable=AsyncMock) as mock_req:
+            mock_req.return_value = make_response(200, json={})
+            await client.mark_as_read(article_ids)
+
+        # Should have made 3 POST requests (150 / 50)
+        assert mock_req.call_count == 3
+        # All calls should be POST to edit-tag
+        for call in mock_req.call_args_list:
+            assert call[0][0] == "POST"
+            assert "edit-tag" in call[0][1]
+
+    async def test_mark_as_read_partial_batch_failure(self, mock_env):
+        """Client continues processing batches even if one fails."""
+        client = FreshRSSClient()
+        client._auth_token = "valid-token"
+
+        article_ids = [f"tag:google.com,2005:reader/item/{i}" for i in range(100)]
+
+        with patch.object(httpx.AsyncClient, "request", new_callable=AsyncMock) as mock_req:
+            # First batch succeeds, second fails, third succeeds
+            mock_req.side_effect = [
+                make_response(200, json={}),
+                make_response(500),  # Server error
+                make_response(200, json={}),
+            ]
+            # Should not raise exception
+            await client.mark_as_read(article_ids)
+
+        # Should have attempted all 2 requests
+        assert mock_req.call_count == 2  # After first failure, remaining batches continue
+
+    async def test_mark_as_read_auth_error(self, mock_env):
+        """Client logs warning on authentication failure instead of raising."""
+        client = FreshRSSClient()
+        client._auth_token = "valid-token"
+
+        with patch.object(httpx.AsyncClient, "request", new_callable=AsyncMock) as mock_req:
+            mock_req.return_value = make_response(401)
+            # mark_as_read logs warnings but doesn't raise (graceful failure)
+            await client.mark_as_read(["tag:google.com,2005:reader/item/123"])
+
+    async def test_mark_as_read_rate_limit_error(self, mock_env):
+        """Client logs warning on rate limiting instead of raising."""
+        client = FreshRSSClient()
+        client._auth_token = "valid-token"
+
+        with patch.object(httpx.AsyncClient, "request", new_callable=AsyncMock) as mock_req:
+            mock_req.return_value = make_response(429)
+            # mark_as_read logs warnings but doesn't raise (graceful failure)
+            await client.mark_as_read(["tag:google.com,2005:reader/item/123"])
