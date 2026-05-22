@@ -10,7 +10,7 @@ from httpx import ASGITransport, AsyncClient
 
 from ryushi.feeds.store import FeedStore
 from ryushi.scheduler.api import router, set_scheduler
-from ryushi.scheduler.models import CategorySchedule, ScheduleConfig
+from ryushi.scheduler.models import CategoryConfig, ScheduleConfig
 from ryushi.scheduler.scheduler import DigestScheduler
 from ryushi.scheduler.store import JobStore
 
@@ -46,8 +46,8 @@ def sample_config():
     """Create a sample schedule configuration."""
     return ScheduleConfig(
         categories={
-            "technology": CategorySchedule(schedule="0 6 * * *"),
-            "science": CategorySchedule(schedule="0 8 * * 1"),
+            "technology": CategoryConfig(schedule="0 6 * * *"),
+            "science": CategoryConfig(schedule="0 8 * * 1"),
         }
     )
 

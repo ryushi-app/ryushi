@@ -76,12 +76,12 @@ def estimate_tokens(text: str) -> int:
     return len(text) // CHARS_PER_TOKEN
 
 
-def format_system_prompt(template: str, language: str = "English") -> str:
+def format_system_prompt(template: str, language: str = "German") -> str:
     """Format a system prompt template with variables.
 
     Args:
         template: System prompt template with {variable} placeholders.
-        language: Language for digest output.
+        language: Language for digest output (default: German).
 
     Returns:
         Formatted system prompt.

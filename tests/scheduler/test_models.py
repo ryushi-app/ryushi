@@ -6,6 +6,7 @@ import pytest
 from pydantic import ValidationError
 
 from ryushi.scheduler.models import (
+    CategoryConfig,
     CategorySchedule,
     JobHistoryResponse,
     JobListResponse,
@@ -126,13 +127,17 @@ class TestScheduleConfig:
         """Test creating ScheduleConfig with categories."""
         config = ScheduleConfig(
             categories={
-                "technology": CategorySchedule(schedule="0 6 * * *"),
-                "science": CategorySchedule(schedule="0 8 * * 1"),
+                "technology": CategoryConfig(schedule="0 6 * * *"),
+                "science": CategoryConfig(schedule="0 8 * * 1"),
             }
         )
         assert len(config.categories) == 2
         assert config.categories["technology"].schedule == "0 6 * * *"
         assert config.categories["science"].schedule == "0 8 * * 1"
+        # CategoryConfig has defaults for language, prompt, favicon
+        assert config.categories["technology"].language == "German"
+        assert config.categories["technology"].prompt is None
+        assert config.categories["technology"].favicon is None
 
 
 class TestResponseModels:

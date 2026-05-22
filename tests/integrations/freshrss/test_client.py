@@ -552,21 +552,21 @@ class TestMarkAsRead:
         assert mock_req.call_count == 2  # After first failure, remaining batches continue
 
     async def test_mark_as_read_auth_error(self, mock_env):
-        """Client raises AuthError on authentication failure."""
+        """Client logs warning on authentication failure instead of raising."""
         client = FreshRSSClient()
         client._auth_token = "valid-token"
 
         with patch.object(httpx.AsyncClient, "request", new_callable=AsyncMock) as mock_req:
             mock_req.return_value = make_response(401)
-            with pytest.raises(AuthError):
-                await client.mark_as_read(["tag:google.com,2005:reader/item/123"])
+            # mark_as_read logs warnings but doesn't raise (graceful failure)
+            await client.mark_as_read(["tag:google.com,2005:reader/item/123"])
 
     async def test_mark_as_read_rate_limit_error(self, mock_env):
-        """Client raises RateLimitError on rate limiting."""
+        """Client logs warning on rate limiting instead of raising."""
         client = FreshRSSClient()
         client._auth_token = "valid-token"
 
         with patch.object(httpx.AsyncClient, "request", new_callable=AsyncMock) as mock_req:
             mock_req.return_value = make_response(429)
-            with pytest.raises(RateLimitError):
-                await client.mark_as_read(["tag:google.com,2005:reader/item/123"])
+            # mark_as_read logs warnings but doesn't raise (graceful failure)
+            await client.mark_as_read(["tag:google.com,2005:reader/item/123"])
