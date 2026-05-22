@@ -87,6 +87,8 @@ class DigestEngine:
         self,
         articles: list["Article"],
         category_name: str,
+        language: str | None = None,
+        custom_prompt: str | None = None,
     ) -> Digest | None:
         """Generate a digest from a list of articles.
 
@@ -95,6 +97,8 @@ class DigestEngine:
         Args:
             articles: List of Article objects to summarize.
             category_name: Name of the category being digested.
+            language: Optional language override (defaults to config language).
+            custom_prompt: Optional custom system prompt template (defaults to config prompt).
 
         Returns:
             Digest object with AI-generated summary, or None if no articles.
@@ -117,10 +121,15 @@ class DigestEngine:
             logger.warning("No articles fit in context window")
             return None
 
-        # Format system prompt
+        # Format system prompt with language and custom prompt overrides
+        effective_language = language or self.config.language
+        effective_prompt_template = (
+            custom_prompt or self.config.system_prompt or DEFAULT_SYSTEM_PROMPT
+        )
+
         system_prompt = format_system_prompt(
-            self.config.system_prompt or DEFAULT_SYSTEM_PROMPT,
-            language=self.config.language,
+            effective_prompt_template,
+            language=effective_language,
         )
 
         # Make the AI call

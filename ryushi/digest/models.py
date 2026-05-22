@@ -52,7 +52,7 @@ class DigestConfig(BaseModel):
     base_url: str | None = Field(default_factory=_get_default_base_url)
     api_key: str | None = Field(default_factory=_get_default_api_key)
     system_prompt: str | None = None
-    language: str = "English"
+    language: str = "German"
 
 
 class Digest(BaseModel):

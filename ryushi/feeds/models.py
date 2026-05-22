@@ -20,6 +20,7 @@ class FeedEntry(BaseModel):
         published: Timestamp when the digest was generated.
         content_html: HTML-rendered digest summary.
         source_urls: URLs referenced in the digest.
+        favicon_url: Optional favicon URL for the feed icon.
     """
 
     id: str = Field(default_factory=lambda: str(uuid4()))
@@ -28,6 +29,7 @@ class FeedEntry(BaseModel):
     published: datetime = Field(default_factory=lambda: datetime.now(UTC))
     content_html: str
     source_urls: list[str] = Field(default_factory=list)
+    favicon_url: str | None = None
 
 
 class FeedMeta(BaseModel):
@@ -39,6 +41,7 @@ class FeedMeta(BaseModel):
         url: Full URL to the feed.
         last_updated: Timestamp of the most recent entry.
         item_count: Number of entries in the feed.
+        favicon_url: Optional favicon URL for the feed icon.
     """
 
     category: str
@@ -46,6 +49,7 @@ class FeedMeta(BaseModel):
     url: str
     last_updated: datetime | None = None
     item_count: int = 0
+    favicon_url: str | None = None
 
 
 class FeedIndex(BaseModel):

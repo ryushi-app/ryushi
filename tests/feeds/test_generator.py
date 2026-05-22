@@ -253,3 +253,71 @@ class TestFeedGenerator:
         entry_elements = root.findall("atom:entry", ns)
         assert entry_elements[0].find("atom:id", ns).text == "urn:ryushi:entry:newer"
         assert entry_elements[1].find("atom:id", ns).text == "urn:ryushi:entry:older"
+
+    def test_feed_with_favicon(self):
+        """Test that feed includes favicon when provided."""
+        generator = FeedGenerator(base_url="https://example.com")
+        xml = generator.generate_feed([], "Technology", favicon="/static/tech.png")
+
+        root = ET.fromstring(xml)
+        ns = {"atom": "http://www.w3.org/2005/Atom"}
+
+        icon = root.find("atom:icon", ns)
+        assert icon is not None
+        assert icon.text == "/static/tech.png"
+
+    def test_feed_without_favicon(self):
+        """Test that feed has no icon element when favicon is None."""
+        generator = FeedGenerator(base_url="https://example.com")
+        xml = generator.generate_feed([], "Technology", favicon=None)
+
+        root = ET.fromstring(xml)
+        ns = {"atom": "http://www.w3.org/2005/Atom"}
+
+        icon = root.find("atom:icon", ns)
+        assert icon is None
+
+    def test_feed_with_absolute_favicon_url(self):
+        """Test that feed includes absolute favicon URL."""
+        generator = FeedGenerator(base_url="https://example.com")
+        favicon_url = "https://cdn.example.com/icons/tech.png"
+        xml = generator.generate_feed([], "Technology", favicon=favicon_url)
+
+        root = ET.fromstring(xml)
+        ns = {"atom": "http://www.w3.org/2005/Atom"}
+
+        icon = root.find("atom:icon", ns)
+        assert icon is not None
+        assert icon.text == favicon_url
+
+    def test_digest_to_entry_with_favicon(self):
+        """Test converting Digest to FeedEntry with favicon."""
+        digest = Digest(
+            id="test-digest-id",
+            category_name="Technology",
+            generated_at=datetime(2024, 1, 15, 10, 0, 0, tzinfo=UTC),
+            summary="# Summary\n\nThis is a test digest.",
+            article_count=5,
+            source_urls=["https://example.com/1"],
+            model_used="gpt-4.1-mini",
+        )
+
+        entry = digest_to_entry(digest, favicon_url="/static/tech.png")
+
+        assert entry.favicon_url == "/static/tech.png"
+        assert entry.id == "test-digest-id"
+
+    def test_digest_to_entry_without_favicon(self):
+        """Test converting Digest to FeedEntry without favicon."""
+        digest = Digest(
+            id="test-digest-id",
+            category_name="Technology",
+            generated_at=datetime(2024, 1, 15, 10, 0, 0, tzinfo=UTC),
+            summary="Test",
+            article_count=1,
+            model_used="gpt-4.1-mini",
+        )
+
+        entry = digest_to_entry(digest)
+
+        assert entry.favicon_url is None

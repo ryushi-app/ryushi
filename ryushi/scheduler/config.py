@@ -11,7 +11,7 @@ import yaml
 from croniter import croniter
 
 from ryushi.scheduler.exceptions import ConfigurationError
-from ryushi.scheduler.models import CategorySchedule, ScheduleConfig
+from ryushi.scheduler.models import CategoryConfig, ScheduleConfig
 
 logger = logging.getLogger(__name__)
 
@@ -72,9 +72,9 @@ def parse_config(raw_config: dict) -> ScheduleConfig:
         raw_config: Dictionary from YAML parsing.
 
     Returns:
-        ScheduleConfig with validated category schedules.
+        ScheduleConfig with validated category configurations.
     """
-    categories: dict[str, CategorySchedule] = {}
+    categories: dict[str, CategoryConfig] = {}
 
     raw_categories = raw_config.get("categories", {})
     if not isinstance(raw_categories, dict):
@@ -105,12 +105,28 @@ def parse_config(raw_config: dict) -> ScheduleConfig:
             )
             continue
 
-        categories[category_slug] = CategorySchedule(schedule=schedule)
-        logger.info(
-            "Loaded schedule for '%s': %s",
-            category_slug,
-            schedule,
-        )
+        # Create CategoryConfig with optional fields (language, prompt, favicon)
+        try:
+            config = CategoryConfig(
+                schedule=schedule,
+                language=category_config.get("language", "German"),
+                prompt=category_config.get("prompt"),
+                favicon=category_config.get("favicon"),
+            )
+            categories[category_slug] = config
+            logger.info(
+                "Loaded config for '%s': schedule=%s, language=%s",
+                category_slug,
+                schedule,
+                config.language,
+            )
+        except Exception as e:
+            logger.error(
+                "Failed to parse config for category '%s': %s, skipping",
+                category_slug,
+                str(e),
+            )
+            continue
 
     return ScheduleConfig(categories=categories)
 

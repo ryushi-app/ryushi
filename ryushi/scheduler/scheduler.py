@@ -173,7 +173,18 @@ class DigestScheduler:
             category_slug: Category to run job for.
         """
         try:
-            await self.executor.execute_job(category_slug)
+            # Get category config for language, prompt, and favicon
+            category_config = self.config.categories.get(category_slug)
+            language = category_config.language if category_config else None
+            custom_prompt = category_config.prompt if category_config else None
+            favicon = category_config.favicon if category_config else None
+
+            await self.executor.execute_job(
+                category_slug,
+                language=language,
+                custom_prompt=custom_prompt,
+                favicon=favicon,
+            )
         except Exception as e:
             logger.error("Error running job for '%s': %s", category_slug, e)
 

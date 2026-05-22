@@ -152,7 +152,7 @@ class TestGenerateDigest:
         call_args = mock_ai.call_args
         messages = call_args.kwargs["messages"]
         system_message = messages[0]["content"]
-        assert "Custom prompt for English" in system_message
+        assert "Custom prompt for German" in system_message
 
 
 class TestRetryLogic:

@@ -101,7 +101,10 @@ def create_feeds_router(
         # Convert slug back to category name for display
         category_name = category_slug.replace("-", " ").title()
 
-        xml = generator.generate_feed(entries, category_name)
+        # Extract favicon from first entry if available (all entries for a category share it)
+        favicon = entries[0].favicon_url if entries else None
+
+        xml = generator.generate_feed(entries, category_name, favicon=favicon)
 
         return Response(
             content=xml,
