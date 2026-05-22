@@ -404,7 +404,7 @@ class FreshRSSClient:
         }
 
         try:
-            response = await self._request(
+            await self._request(
                 "POST",
                 "/api/greader.php/reader/api/0/edit-tag",
                 params=params,
