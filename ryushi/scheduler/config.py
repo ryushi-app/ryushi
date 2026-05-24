@@ -105,20 +105,33 @@ def parse_config(raw_config: dict) -> ScheduleConfig:
             )
             continue
 
-        # Create CategoryConfig with optional fields (language, prompt, favicon)
+        # Create CategoryConfig with optional fields (language, prompt, favicon, gist)
         try:
+            gist_enabled = category_config.get("gist_enabled", False)
+            gist_id = category_config.get("gist_id")
+
+            # Warn if gist is enabled but ID is missing
+            if gist_enabled and not gist_id:
+                logger.warning(
+                    "Category '%s' has gist_enabled=true but no gist_id provided, skipping Gist publishing",
+                    category_slug,
+                )
+
             config = CategoryConfig(
                 schedule=schedule,
                 language=category_config.get("language", "German"),
                 prompt=category_config.get("prompt"),
                 favicon=category_config.get("favicon"),
+                gist_enabled=gist_enabled,
+                gist_id=gist_id,
             )
             categories[category_slug] = config
             logger.info(
-                "Loaded config for '%s': schedule=%s, language=%s",
+                "Loaded config for '%s': schedule=%s, language=%s, gist_enabled=%s",
                 category_slug,
                 schedule,
                 config.language,
+                config.gist_enabled,
             )
         except Exception as e:
             logger.error(

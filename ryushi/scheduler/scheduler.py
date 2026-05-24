@@ -173,17 +173,21 @@ class DigestScheduler:
             category_slug: Category to run job for.
         """
         try:
-            # Get category config for language, prompt, and favicon
+            # Get category config for language, prompt, favicon, and Gist settings
             category_config = self.config.categories.get(category_slug)
             language = category_config.language if category_config else None
             custom_prompt = category_config.prompt if category_config else None
             favicon = category_config.favicon if category_config else None
+            gist_enabled = category_config.gist_enabled if category_config else False
+            gist_id = category_config.gist_id if category_config else None
 
             await self.executor.execute_job(
                 category_slug,
                 language=language,
                 custom_prompt=custom_prompt,
                 favicon=favicon,
+                gist_enabled=gist_enabled,
+                gist_id=gist_id,
             )
         except Exception as e:
             logger.error("Error running job for '%s': %s", category_slug, e)
@@ -257,7 +261,16 @@ class DigestScheduler:
 
         async def run_and_complete():
             try:
-                article_count = await self.executor._fetch_and_process(category_slug)
+                # Get category config for Gist settings
+                category_config = self.config.categories.get(category_slug)
+                gist_enabled = category_config.gist_enabled if category_config else False
+                gist_id = category_config.gist_id if category_config else None
+
+                article_count = await self.executor._fetch_and_process(
+                    category_slug,
+                    gist_enabled=gist_enabled,
+                    gist_id=gist_id,
+                )
                 await self.job_store.complete_run(
                     job_id=job_run.id,
                     status="success",

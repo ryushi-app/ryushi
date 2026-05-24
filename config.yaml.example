@@ -24,6 +24,9 @@ categories:
     #   Struktur: ein Einleitungssatz zu den Hauptthemen, dann Stichpunkte pro Artikel.
     # Optional: favicon URL for the feed (relative or absolute URL)
     # favicon: "/static/tech.png"
+    # Optional: publish feed to GitHub Gist (requires GITHUB_TOKEN environment variable)
+    # gist_enabled: true
+    # gist_id: "abc123def456"
 
   # Generate software engineering digest daily at 7:00 AM
   software-engineering:
@@ -31,6 +34,9 @@ categories:
     # Example with custom language and favicon
     # language: "English"
     # favicon: "https://cdn.example.com/icons/engineering.png"
+    # Example: publish to GitHub Gist
+    # gist_enabled: true
+    # gist_id: "your-gist-id-here"
 
   # Generate science digest weekly on Mondays at 8:00 AM
   science:
@@ -67,6 +73,40 @@ categories:
 #     URL to the feed icon (favicon) displayed by feed readers.
 #     Can be relative (e.g., "/static/icon.png") or absolute (e.g., "https://example.com/icon.png").
 #     If not specified, no icon is displayed.
+#
+#   gist_enabled (optional, default: false):
+#     Enable publishing the generated feed to a GitHub Gist.
+#     When enabled, the Atom feed XML will be published to the specified Gist after each digest generation.
+#     Requires GITHUB_TOKEN environment variable to be set with a valid GitHub token.
+#     The Gist is updated (not recreated) on each run, maintaining a stable URL.
+#     Example: gist_enabled: true
+#
+#   gist_id (optional):
+#     The GitHub Gist ID where the feed should be published.
+#     Required if gist_enabled is true.
+#     To obtain a gist_id:
+#       1. Create a new Gist on GitHub (https://gist.github.com)
+#       2. Copy the ID from the URL (e.g., https://gist.github.com/username/abc123def456 → abc123def456)
+#       3. Paste it here
+#     The feed will be published to a file named "{category-slug}.atom.xml" in the Gist.
+#     Example: gist_id: "abc123def456"
+#
+# GitHub Token Setup (GITHUB_TOKEN)
+# ──────────────────────────────────
+#
+# To enable Gist publishing, set the GITHUB_TOKEN environment variable with a valid GitHub token:
+#
+#   export GITHUB_TOKEN="ghp_xxxxxxxxxxxx..."
+#   python -m ryushi start
+#
+# Recommended approach:
+#   1. Go to https://github.com/settings/tokens/new
+#   2. Create a "Fine-grained personal access token"
+#   3. Grant only the "gist" permission scope (under "Account permissions")
+#   4. Copy the token and save it as GITHUB_TOKEN environment variable
+#
+# Security note: Keep your GitHub token secure and never commit it to version control.
+# Use environment variables or secret management tools to store it.
 #
 # Note: Category slugs must match your FreshRSS category names
 # (converted to lowercase with spaces replaced by hyphens).

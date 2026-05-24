@@ -10,7 +10,10 @@ from datetime import UTC, datetime
 
 from ryushi.digest import DigestConfig, DigestEngine
 from ryushi.feeds import FeedStore, digest_to_entry
+from ryushi.feeds.generator import FeedGenerator
+from ryushi.feeds.models import FeedEntry
 from ryushi.integrations.freshrss import FreshRSSClient
+from ryushi.integrations.github import GistPublisher
 from ryushi.scheduler.models import JobRun
 from ryushi.scheduler.store import JobStore
 
@@ -55,6 +58,8 @@ class JobExecutor:
         language: str | None = None,
         custom_prompt: str | None = None,
         favicon: str | None = None,
+        gist_enabled: bool = False,
+        gist_id: str | None = None,
     ) -> JobRun:
         """Execute a digest generation job for a category.
 
@@ -63,14 +68,17 @@ class JobExecutor:
         2. Fetch unread articles from FreshRSS
         3. Generate digest using DigestEngine (if articles exist)
         4. Store feed entry (if digest generated)
-        5. Mark articles as read in FreshRSS
-        6. Complete job run with status 'success' or 'failed'
+        5. Publish to Gist if configured (if gist_enabled=True and gist_id provided)
+        6. Mark articles as read in FreshRSS
+        7. Complete job run with status 'success' or 'failed'
 
         Args:
             category_slug: The category slug to process.
             language: Optional language override for digest generation.
             custom_prompt: Optional custom prompt override for digest generation.
             favicon: Optional favicon URL for feed generation.
+            gist_enabled: Whether to publish feed to GitHub Gist.
+            gist_id: GitHub Gist ID to publish to (required if gist_enabled=True).
 
         Returns:
             The completed JobRun record.
@@ -95,6 +103,8 @@ class JobExecutor:
                 language=language,
                 custom_prompt=custom_prompt,
                 favicon=favicon,
+                gist_enabled=gist_enabled,
+                gist_id=gist_id,
             )
 
             # Calculate duration
@@ -146,6 +156,8 @@ class JobExecutor:
         language: str | None = None,
         custom_prompt: str | None = None,
         favicon: str | None = None,
+        gist_enabled: bool = False,
+        gist_id: str | None = None,
     ) -> int:
         """Fetch articles and process them into a digest.
 
@@ -154,6 +166,8 @@ class JobExecutor:
             language: Optional language override for digest generation.
             custom_prompt: Optional custom prompt override for digest generation.
             favicon: Optional favicon URL for feed generation.
+            gist_enabled: Whether to publish feed to GitHub Gist.
+            gist_id: GitHub Gist ID to publish to (required if gist_enabled=True).
 
         Returns:
             Number of articles processed.
@@ -215,6 +229,16 @@ class JobExecutor:
             digest.id,
         )
 
+        # Publish to Gist if configured
+        if gist_enabled and gist_id:
+            await self._publish_to_gist(
+                category_slug=category_slug,
+                gist_id=gist_id,
+                category_name=category.name,
+                feed_entry=feed_entry,
+                favicon=favicon,
+            )
+
         # Mark articles as read in FreshRSS
         article_ids = [article.id for article in articles]
         await self.freshrss_client.mark_as_read(article_ids)
@@ -225,3 +249,46 @@ class JobExecutor:
         )
 
         return article_count
+
+    async def _publish_to_gist(
+        self,
+        category_slug: str,
+        gist_id: str,
+        category_name: str,
+        feed_entry: FeedEntry,
+        favicon: str | None = None,
+    ) -> None:
+        """Publish the feed entry to a GitHub Gist.
+
+        Args:
+            category_slug: The category slug for filename generation.
+            gist_id: GitHub Gist ID to publish to.
+            category_name: Category name for feed generation.
+            feed_entry: The feed entry to generate XML from.
+            favicon: Optional favicon URL for the feed.
+        """
+        try:
+            # Generate Atom XML from the feed entry
+            feed_generator = FeedGenerator()
+            atom_xml = feed_generator.generate_feed(
+                entries=[feed_entry],
+                category_name=category_name,
+                favicon=favicon,
+            )
+
+            # Publish to Gist
+            gist_publisher = GistPublisher()
+            filename = f"{category_slug}.atom.xml"
+            await gist_publisher.publish(gist_id, filename, atom_xml)
+
+            logger.info(
+                "Published feed to Gist %s for category '%s'",
+                gist_id,
+                category_slug,
+            )
+        except Exception as e:
+            logger.warning(
+                "Failed to publish to Gist for category '%s': %s",
+                category_slug,
+                str(e),
+            )

@@ -234,6 +234,72 @@ class TestParseConfig:
         config = parse_config(raw)
         assert config.categories["tech"].language == "German"
 
+    def test_parse_category_with_gist_enabled(self):
+        """Test parsing category with gist publishing enabled."""
+        raw = {
+            "categories": {
+                "tech": {
+                    "schedule": "0 6 * * *",
+                    "gist_enabled": True,
+                    "gist_id": "abc123def456",
+                }
+            }
+        }
+        config = parse_config(raw)
+        cat = config.categories["tech"]
+        assert cat.gist_enabled is True
+        assert cat.gist_id == "abc123def456"
+
+    def test_parse_category_without_gist_fields(self):
+        """Test parsing category without gist fields defaults to disabled."""
+        raw = {
+            "categories": {
+                "tech": {"schedule": "0 6 * * *"},
+            }
+        }
+        config = parse_config(raw)
+        cat = config.categories["tech"]
+        assert cat.gist_enabled is False
+        assert cat.gist_id is None
+
+    def test_parse_category_gist_enabled_without_id(self):
+        """Test parsing category with gist_enabled but no gist_id logs warning."""
+        raw = {
+            "categories": {
+                "tech": {
+                    "schedule": "0 6 * * *",
+                    "gist_enabled": True,
+                }
+            }
+        }
+        config = parse_config(raw)
+        # Config should still be created even with warning
+        assert config.categories["tech"].gist_enabled is True
+        assert config.categories["tech"].gist_id is None
+
+    def test_parse_category_with_all_fields_including_gist(self):
+        """Test parsing category with all fields including gist."""
+        raw = {
+            "categories": {
+                "tech": {
+                    "schedule": "0 6 * * *",
+                    "language": "English",
+                    "prompt": "Summarize in English",
+                    "favicon": "/static/tech.png",
+                    "gist_enabled": True,
+                    "gist_id": "xyz789abc123",
+                }
+            }
+        }
+        config = parse_config(raw)
+        cat = config.categories["tech"]
+        assert cat.schedule == "0 6 * * *"
+        assert cat.language == "English"
+        assert cat.prompt == "Summarize in English"
+        assert cat.favicon == "/static/tech.png"
+        assert cat.gist_enabled is True
+        assert cat.gist_id == "xyz789abc123"
+
 
 class TestGetCategorySlugs:
     """Tests for get_category_slugs helper."""

@@ -67,12 +67,16 @@ class CategoryConfig(BaseModel):
         language: Language for digest output (e.g., "German", "English"). Defaults to "German".
         prompt: Custom system prompt template for digest generation (optional).
         favicon: URL for the category's feed icon (optional).
+        gist_enabled: Whether to publish feed to GitHub Gist (default: False).
+        gist_id: GitHub Gist ID to publish to (required if gist_enabled=True).
     """
 
     schedule: str
     language: str = "German"
     prompt: str | None = None
     favicon: str | None = None
+    gist_enabled: bool = False
+    gist_id: str | None = None
 
 
 class ScheduleConfig(BaseModel):
