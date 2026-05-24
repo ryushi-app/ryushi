@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS feed_entries (
     published TEXT NOT NULL,
     content_html TEXT NOT NULL,
     source_urls TEXT NOT NULL,
+    favicon_url TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -105,8 +106,8 @@ class FeedStore:
                 await db.execute(
                     """
                     INSERT OR REPLACE INTO feed_entries 
-                    (id, category_slug, title, published, content_html, source_urls, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    (id, category_slug, title, published, content_html, source_urls, favicon_url, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         entry.id,
@@ -115,6 +116,7 @@ class FeedStore:
                         entry.published.isoformat(),
                         entry.content_html,
                         json.dumps(entry.source_urls),
+                        entry.favicon_url,
                         datetime.now(UTC).isoformat(),
                     ),
                 )
@@ -162,7 +164,7 @@ class FeedStore:
                 db.row_factory = aiosqlite.Row
                 cursor = await db.execute(
                     """
-                    SELECT id, category_slug, title, published, content_html, source_urls
+                    SELECT id, category_slug, title, published, content_html, source_urls, favicon_url
                     FROM feed_entries
                     WHERE category_slug = ?
                     ORDER BY published DESC
@@ -181,6 +183,7 @@ class FeedStore:
                             published=datetime.fromisoformat(row["published"]),
                             content_html=row["content_html"],
                             source_urls=json.loads(row["source_urls"]),
+                            favicon_url=row["favicon_url"],
                         )
                     )
 
