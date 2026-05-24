@@ -25,6 +25,9 @@ services:
       - RYUSHI_AI_API_KEY=${RYUSHI_AI_API_KEY:?AI API key is required}
       - RYUSHI_AI_BASE_URL=${RYUSHI_AI_BASE_URL:-}
       - RYUSHI_AI_MODEL=${RYUSHI_AI_MODEL:-gpt-4.1-mini}
+      
+      # GitHub Gist publishing (optional)
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
     volumes:
       # Persist databases and configuration
       - ryushi-data:/data
