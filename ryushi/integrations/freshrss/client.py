@@ -370,6 +370,8 @@ class FreshRSSClient:
             logger.debug("No articles to mark as read")
             return
 
+        logger.info("Attempting to mark %d articles as read", len(article_ids))
+
         # Batch articles into chunks of 50 (FreshRSS API limit)
         batch_size = 50
         for i in range(0, len(article_ids), batch_size):
@@ -377,6 +379,7 @@ class FreshRSSClient:
 
             try:
                 await self._mark_as_read_batch(batch)
+                logger.info("Successfully marked %d articles as read", len(batch))
             except Exception as e:
                 logger.warning(
                     "Failed to mark %d articles as read: %s",

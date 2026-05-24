@@ -241,9 +241,14 @@ class JobExecutor:
 
         # Mark articles as read in FreshRSS
         article_ids = [article.id for article in articles]
+        logger.info(
+            "About to mark %d articles as read for category '%s'",
+            len(article_ids),
+            category_slug,
+        )
         await self.freshrss_client.mark_as_read(article_ids)
-        logger.debug(
-            "Marked %d articles as read for category '%s'",
+        logger.info(
+            "Completed marking %d articles as read for category '%s'",
             len(article_ids),
             category_slug,
         )
