@@ -252,3 +252,132 @@ class TestJobExecutorCategoryMatching:
 
         # Should have called get_unread_items (category was found)
         mock_freshrss_client.get_unread_items.assert_called_once()
+
+
+class TestJobExecutorGistPublishing:
+    """Tests for Gist publishing functionality."""
+
+    async def test_gist_publishing_enabled(self, job_store, feed_store, mock_freshrss_client):
+        """Test job execution with Gist publishing enabled."""
+        mock_freshrss_client.get_categories = AsyncMock(return_value=[make_category("Technology")])
+        mock_freshrss_client.get_unread_items = AsyncMock(return_value=[make_article()])
+
+        with patch("ryushi.scheduler.executor.DigestEngine") as mock_engine_class:
+            mock_engine = MagicMock()
+            mock_engine.generate_digest = AsyncMock(return_value=make_digest())
+            mock_engine_class.return_value = mock_engine
+
+            with patch("ryushi.scheduler.executor.GistPublisher") as mock_gist_class:
+                mock_gist = MagicMock()
+                mock_gist.publish = AsyncMock(return_value=None)
+                mock_gist_class.return_value = mock_gist
+
+                executor = JobExecutor(
+                    job_store=job_store,
+                    feed_store=feed_store,
+                    freshrss_client=mock_freshrss_client,
+                )
+
+                result = await executor.execute_job(
+                    "technology",
+                    gist_enabled=True,
+                    gist_id="test-gist-id",
+                )
+
+                assert result.status == "success"
+                # Verify GistPublisher.publish was called
+                mock_gist.publish.assert_called_once()
+                call_args = mock_gist.publish.call_args
+                assert call_args[0][0] == "test-gist-id"  # gist_id
+                assert call_args[0][1] == "technology.atom.xml"  # filename
+                assert "<?xml" in call_args[0][2]  # content contains XML
+
+    async def test_gist_publishing_disabled(self, job_store, feed_store, mock_freshrss_client):
+        """Test job execution with Gist publishing disabled."""
+        mock_freshrss_client.get_categories = AsyncMock(return_value=[make_category("Technology")])
+        mock_freshrss_client.get_unread_items = AsyncMock(return_value=[make_article()])
+
+        with patch("ryushi.scheduler.executor.DigestEngine") as mock_engine_class:
+            mock_engine = MagicMock()
+            mock_engine.generate_digest = AsyncMock(return_value=make_digest())
+            mock_engine_class.return_value = mock_engine
+
+            with patch("ryushi.scheduler.executor.GistPublisher") as mock_gist_class:
+                mock_gist = MagicMock()
+                mock_gist.publish = AsyncMock(return_value=None)
+                mock_gist_class.return_value = mock_gist
+
+                executor = JobExecutor(
+                    job_store=job_store,
+                    feed_store=feed_store,
+                    freshrss_client=mock_freshrss_client,
+                )
+
+                result = await executor.execute_job("technology", gist_enabled=False)
+
+                assert result.status == "success"
+                # Verify GistPublisher.publish was NOT called
+                mock_gist.publish.assert_not_called()
+
+    async def test_gist_publishing_without_gist_id(
+        self, job_store, feed_store, mock_freshrss_client
+    ):
+        """Test job execution with Gist enabled but no gist_id."""
+        mock_freshrss_client.get_categories = AsyncMock(return_value=[make_category("Technology")])
+        mock_freshrss_client.get_unread_items = AsyncMock(return_value=[make_article()])
+
+        with patch("ryushi.scheduler.executor.DigestEngine") as mock_engine_class:
+            mock_engine = MagicMock()
+            mock_engine.generate_digest = AsyncMock(return_value=make_digest())
+            mock_engine_class.return_value = mock_engine
+
+            with patch("ryushi.scheduler.executor.GistPublisher") as mock_gist_class:
+                mock_gist = MagicMock()
+                mock_gist.publish = AsyncMock(return_value=None)
+                mock_gist_class.return_value = mock_gist
+
+                executor = JobExecutor(
+                    job_store=job_store,
+                    feed_store=feed_store,
+                    freshrss_client=mock_freshrss_client,
+                )
+
+                result = await executor.execute_job("technology", gist_enabled=True, gist_id=None)
+
+                assert result.status == "success"
+                # Verify GistPublisher.publish was NOT called (no gist_id)
+                mock_gist.publish.assert_not_called()
+
+    async def test_gist_publishing_failure_doesnt_fail_job(
+        self, job_store, feed_store, mock_freshrss_client
+    ):
+        """Test that Gist publishing failure doesn't fail the job."""
+        mock_freshrss_client.get_categories = AsyncMock(return_value=[make_category("Technology")])
+        mock_freshrss_client.get_unread_items = AsyncMock(return_value=[make_article()])
+
+        with patch("ryushi.scheduler.executor.DigestEngine") as mock_engine_class:
+            mock_engine = MagicMock()
+            mock_engine.generate_digest = AsyncMock(return_value=make_digest())
+            mock_engine_class.return_value = mock_engine
+
+            with patch("ryushi.scheduler.executor.GistPublisher") as mock_gist_class:
+                mock_gist = MagicMock()
+                # Simulate Gist publishing failure
+                mock_gist.publish = AsyncMock(side_effect=Exception("Gist API error"))
+                mock_gist_class.return_value = mock_gist
+
+                executor = JobExecutor(
+                    job_store=job_store,
+                    feed_store=feed_store,
+                    freshrss_client=mock_freshrss_client,
+                )
+
+                result = await executor.execute_job(
+                    "technology",
+                    gist_enabled=True,
+                    gist_id="test-gist-id",
+                )
+
+                # Job should still succeed even if Gist publishing fails
+                assert result.status == "success"
+                assert result.article_count == 1
