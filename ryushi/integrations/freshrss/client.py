@@ -392,7 +392,7 @@ class FreshRSSClient:
         """Mark a batch of articles as read.
 
         Makes a POST request to the edit-tag endpoint with the article IDs
-        and the read tag.
+        and the read tag. Uses form data with the required T token parameter.
 
         Args:
             article_ids: Batch of article IDs (max 50).
@@ -403,17 +403,29 @@ class FreshRSSClient:
             RateLimitError: If rate limited.
         """
         # Build the request payload for edit-tag endpoint
-        # Format: POST /reader/api/0/edit-tag with form data a=<article_id>&t=<tag>
-        data: dict[str, Any] = {
-            "a": article_ids,  # httpx handles list form data correctly
-            "t": "user/-/state/com.google/read",  # The read tag
+        # FreshRSS requires the T token for write operations
+        # Can be passed as either form data or query parameter
+        # Format: POST /reader/api/0/edit-tag?T=<token> with form data
+        # or: i=<article_id>&a=user/-/state/com.google/read&T=<token>
+
+        token = await self._ensure_authenticated()
+
+        # Build form data with each article ID
+        # FreshRSS expects individual 'i' parameters for each article
+        form_data: dict[str, Any] = {
+            "i": article_ids,  # httpx handles list form data as multiple i= params
+            "a": "user/-/state/com.google/read",  # The read tag to add
         }
+
+        # Pass T token as query parameter
+        params = {"T": token}
 
         try:
             await self._request(
                 "POST",
                 "/api/greader.php/reader/api/0/edit-tag",
-                data=data,
+                params=params,
+                data=form_data,
                 retry_on_401=True,
             )
             logger.debug("Marked %d articles as read", len(article_ids))
