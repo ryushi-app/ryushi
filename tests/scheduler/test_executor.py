@@ -12,7 +12,6 @@ from ryushi.integrations.freshrss.models import Article, Category
 from ryushi.scheduler.executor import JobExecutor
 from ryushi.scheduler.store import JobStore
 from ryushi.feeds.store import FeedStore
-from ryushi.feeds.models import FeedEntry
 
 
 @pytest.fixture

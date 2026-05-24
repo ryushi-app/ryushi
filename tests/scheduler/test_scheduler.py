@@ -3,7 +3,7 @@
 import asyncio
 import tempfile
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -302,11 +302,7 @@ class TestDigestSchedulerGistIntegration:
 
         await scheduler.stop()
 
-        # Verify that execute_job was called with gist parameters
-        # (We check if _fetch_and_process was called during trigger)
-        calls = mock_executor._fetch_and_process.call_args_list
-        # The trigger_job calls _fetch_and_process, so we should have at least one call
-        # Just verify the mock was created with correct config
+        # Verify that the mock was created with correct config
         assert config.categories["technology"].gist_enabled is True
         assert config.categories["technology"].gist_id == "test-gist-123"
 

@@ -1,12 +1,11 @@
 """Tests for GitHub Gist publisher."""
 
-import os
 from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
 
-from ryushi.integrations.github import GistPublisher, GistPublishError
+from ryushi.integrations.github import GistPublisher
 
 
 @pytest.fixture
