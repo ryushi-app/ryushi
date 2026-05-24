@@ -479,8 +479,8 @@ class TestMarkAsRead:
         # Verify POST to edit-tag endpoint
         assert call_args[0][0] == "POST"
         assert "edit-tag" in call_args[0][1]
-        # Verify read tag is used
-        assert call_args[1]["params"]["t"] == "user/-/state/com.google/read"
+        # Verify read tag is used in form data
+        assert call_args[1]["data"]["t"] == "user/-/state/com.google/read"
 
     async def test_mark_multiple_articles_as_read(self, mock_env):
         """Client marks multiple articles as read in one request."""

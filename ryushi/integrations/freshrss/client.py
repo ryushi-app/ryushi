@@ -172,6 +172,7 @@ class FreshRSSClient:
         method: str,
         endpoint: str,
         params: dict[str, Any] | None = None,
+        data: dict[str, Any] | None = None,
         retry_on_401: bool = True,
     ) -> httpx.Response:
         """Make an authenticated request to FreshRSS API.
@@ -182,6 +183,7 @@ class FreshRSSClient:
             method: HTTP method (GET, POST, etc.).
             endpoint: API endpoint path (without base URL).
             params: Query parameters.
+            data: POST form data (for POST requests).
             retry_on_401: Whether to retry on 401 (default True).
 
         Returns:
@@ -204,6 +206,7 @@ class FreshRSSClient:
                     method,
                     url,
                     params=params,
+                    data=data,
                     headers=headers,
                 )
 
@@ -217,7 +220,7 @@ class FreshRSSClient:
                 if response.status_code == 401 and retry_on_401:
                     logger.debug("Got 401, refreshing token and retrying")
                     self._auth_token = None
-                    return await self._request(method, endpoint, params, retry_on_401=False)
+                    return await self._request(method, endpoint, params, data, retry_on_401=False)
 
                 # Handle 401 after retry
                 if response.status_code == 401:
@@ -397,9 +400,9 @@ class FreshRSSClient:
             RateLimitError: If rate limited.
         """
         # Build the request payload for edit-tag endpoint
-        # Format: POST /reader/api/0/edit-tag?a=<article_id>&a=<article_id>&t=<tag>
-        params: dict[str, Any] = {
-            "a": article_ids,  # httpx handles list params correctly
+        # Format: POST /reader/api/0/edit-tag with form data a=<article_id>&t=<tag>
+        data: dict[str, Any] = {
+            "a": article_ids,  # httpx handles list form data correctly
             "t": "user/-/state/com.google/read",  # The read tag
         }
 
@@ -407,7 +410,7 @@ class FreshRSSClient:
             await self._request(
                 "POST",
                 "/api/greader.php/reader/api/0/edit-tag",
-                params=params,
+                data=data,
                 retry_on_401=True,
             )
             logger.debug("Marked %d articles as read", len(article_ids))
