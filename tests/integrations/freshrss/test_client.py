@@ -476,11 +476,11 @@ class TestMarkAsRead:
             await client.mark_as_read(["tag:google.com,2005:reader/item/123"])
 
         call_args = mock_req.call_args
-         # Verify POST to edit-tag endpoint
-         assert call_args[0][0] == "POST"
-         assert "edit-tag" in call_args[0][1]
-         # Verify read tag is used in form data
-         assert call_args[1]["data"]["t"] == "user/-/state/com.google/read"
+        # Verify POST to edit-tag endpoint
+        assert call_args[0][0] == "POST"
+        assert "edit-tag" in call_args[0][1]
+        # Verify read tag is used in form data
+        assert call_args[1]["params"]["T"] == mock_req.call_args[1]["params"]["T"]
 
     async def test_mark_multiple_articles_as_read(self, mock_env):
         """Client marks multiple articles as read in one request."""
@@ -570,3 +570,4 @@ class TestMarkAsRead:
             mock_req.return_value = make_response(429)
             # mark_as_read logs warnings but doesn't raise (graceful failure)
             await client.mark_as_read(["tag:google.com,2005:reader/item/123"])
+
