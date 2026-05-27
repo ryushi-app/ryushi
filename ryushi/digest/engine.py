@@ -19,12 +19,7 @@ from tenacity import (
 
 from .exceptions import DigestError
 from .models import Digest, DigestConfig
-from .prompts import (
-    DEFAULT_SYSTEM_PROMPT,
-    build_prompt,
-    format_system_prompt,
-    select_prompt,
-)
+from .prompts import build_prompt, select_prompt
 
 if TYPE_CHECKING:
     from ryushi.integrations.freshrss.models import Article
