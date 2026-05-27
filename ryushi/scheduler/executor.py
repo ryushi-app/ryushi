@@ -57,6 +57,9 @@ class JobExecutor:
         category_slug: str,
         language: str | None = None,
         custom_prompt: str | None = None,
+        template_type: str | None = None,
+        item_type: str | None = None,
+        interests: list[str] | None = None,
         favicon: str | None = None,
         gist_enabled: bool = False,
         gist_id: str | None = None,
@@ -76,6 +79,9 @@ class JobExecutor:
             category_slug: The category slug to process.
             language: Optional language override for digest generation.
             custom_prompt: Optional custom prompt override for digest generation.
+            template_type: Optional prompt template type (e.g., "digest", "recommendation").
+            item_type: Optional item type for recommendation templates.
+            interests: Optional list of user interests for recommendation templates.
             favicon: Optional favicon URL for feed generation.
             gist_enabled: Whether to publish feed to GitHub Gist.
             gist_id: GitHub Gist ID to publish to (required if gist_enabled=True).
@@ -102,6 +108,9 @@ class JobExecutor:
                 category_slug,
                 language=language,
                 custom_prompt=custom_prompt,
+                template_type=template_type,
+                item_type=item_type,
+                interests=interests,
                 favicon=favicon,
                 gist_enabled=gist_enabled,
                 gist_id=gist_id,
@@ -155,6 +164,9 @@ class JobExecutor:
         category_slug: str,
         language: str | None = None,
         custom_prompt: str | None = None,
+        template_type: str | None = None,
+        item_type: str | None = None,
+        interests: list[str] | None = None,
         favicon: str | None = None,
         gist_enabled: bool = False,
         gist_id: str | None = None,
@@ -165,6 +177,9 @@ class JobExecutor:
             category_slug: The category slug to process.
             language: Optional language override for digest generation.
             custom_prompt: Optional custom prompt override for digest generation.
+            template_type: Optional prompt template type (e.g., "digest", "recommendation").
+            item_type: Optional item type for recommendation templates.
+            interests: Optional list of user interests for recommendation templates.
             favicon: Optional favicon URL for feed generation.
             gist_enabled: Whether to publish feed to GitHub Gist.
             gist_id: GitHub Gist ID to publish to (required if gist_enabled=True).
@@ -207,12 +222,15 @@ class JobExecutor:
             category_slug,
         )
 
-        # Generate digest with optional language and prompt overrides
+        # Generate digest with optional language, template, and prompt overrides
         digest = await self.digest_engine.generate_digest(
             articles,
             category.name,
             language=language,
             custom_prompt=custom_prompt,
+            template_type=template_type,
+            item_type=item_type,
+            interests=interests,
         )
 
         if digest is None:

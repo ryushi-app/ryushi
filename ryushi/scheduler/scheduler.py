@@ -173,10 +173,13 @@ class DigestScheduler:
             category_slug: Category to run job for.
         """
         try:
-            # Get category config for language, prompt, favicon, and Gist settings
+            # Get category config for language, prompt, template settings, favicon, and Gist settings
             category_config = self.config.categories.get(category_slug)
             language = category_config.language if category_config else None
             custom_prompt = category_config.prompt if category_config else None
+            template_type = category_config.template_type if category_config else None
+            item_type = category_config.item_type if category_config else None
+            interests = category_config.interests if category_config else None
             favicon = category_config.favicon if category_config else None
             gist_enabled = category_config.gist_enabled if category_config else False
             gist_id = category_config.gist_id if category_config else None
@@ -185,6 +188,9 @@ class DigestScheduler:
                 category_slug,
                 language=language,
                 custom_prompt=custom_prompt,
+                template_type=template_type,
+                item_type=item_type,
+                interests=interests,
                 favicon=favicon,
                 gist_enabled=gist_enabled,
                 gist_id=gist_id,
