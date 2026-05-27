@@ -38,9 +38,26 @@ categories:
     # gist_enabled: true
     # gist_id: "your-gist-id-here"
 
-  # Generate science digest weekly on Mondays at 8:00 AM
+  # Generate science digest weekly on Mondays at 8:00 AM using recommendation template
   science:
     schedule: "0 8 * * 1"
+    template_type: recommendation              # Use recommendation template instead of digest
+    item_type: research-papers                 # Type of items to recommend
+    interests:                                 # User interests for filtering
+      - Machine Learning
+      - Computer Vision
+      - Natural Language Processing
+
+  # Example: Book recommendations based on user interests
+  # books:
+  #   schedule: "0 9 * * *"                    # Daily at 9:00 AM
+  #   template_type: recommendation            # Use recommendation template
+  #   item_type: books                         # Type of items
+  #   interests:                               # User interests
+  #     - Science Fiction
+  #     - Mystery Novels
+  #     - Fantasy
+  #   language: "English"
 
   # Generate news digest twice daily at 6:00 AM and 6:00 PM
   # news:
@@ -60,10 +77,35 @@ categories:
 #     Language for digest output. Appears in the system prompt sent to the AI.
 #     Common values: "German", "English", "French", "Spanish", etc.
 #
+#   template_type (optional, default: digest):
+#     Type of built-in prompt template to use:
+#     - "digest": News digest template with HTML formatting (default)
+#     - "recommendation": Personalized recommendations based on interests
+#     If both template_type and prompt are specified, prompt takes priority.
+#     See docs/prompt-templates.md for detailed template documentation.
+#     Example:
+#       template_type: recommendation
+#
+#   item_type (optional):
+#     Type of items for recommendation template (e.g., books, movies, papers, articles).
+#     Only used with template_type: recommendation or custom prompts that use {item_type}.
+#     Example: item_type: "books"
+#
+#   interests (optional):
+#     List of user interests for the recommendation template.
+#     Used to filter and rank items based on relevance.
+#     Only used with template_type: recommendation or custom prompts that use {interests}.
+#     Example:
+#       interests:
+#         - Science Fiction
+#         - Mystery
+#
 #   prompt (optional):
 #     Custom system prompt template for digest generation. Must include {language}
 #     placeholder to specify where the language should be inserted.
-#     If not specified, uses the default prompt template.
+#     Can also use {item_type} and {interests} placeholders.
+#     If not specified, uses the template_type if provided, or default digest template.
+#     Takes priority over template_type if both are specified.
 #     Example:
 #       prompt: |
 #         You are a news summarizer. Write a summary in {language}.

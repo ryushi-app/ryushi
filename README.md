@@ -15,13 +15,15 @@ Ryushi is an intelligent RSS feed aggregator that uses AI to summarize articles 
 
 - 🤖 **AI-Powered Summarization** - Uses any LiteLLM-supported AI provider (OpenAI, Mammouth, Claude, local LMs, etc.)
 - 📅 **Flexible Scheduling** - Define digest generation schedules with cron expressions
+- 🎯 **Built-in Prompt Templates** - Pre-configured templates for news digests and personalized recommendations
+- 📊 **Custom Prompts** - Full control with customizable prompt templates for any use case
 - 🌍 **Multi-Provider Support** - OpenAI, Mammouth AI, Anthropic, Azure, local LMs, and more
 - 🔗 **REST API** - Manual job triggering, status monitoring, and job history
-- 📡 **Atom Feeds** - Generated digests are served as standard Atom XML feeds
+- 📡 **Atom Feeds** - Generated digests are served as standard Atom XML feeds with optional GitHub Gist publishing
 - 🐳 **Docker Ready** - Fully containerized with docker-compose support
 - 📊 **12-Factor App** - Configuration via environment variables
-- 🧪 **Well-Tested** - 243 comprehensive tests
-- 📚 **Thoroughly Documented** - Complete API docs and setup guides
+- 🧪 **Well-Tested** - 300+ comprehensive tests
+- 📚 **Thoroughly Documented** - Complete API docs, configuration guides, and examples
 
 ## Quick Start
 
@@ -59,15 +61,22 @@ Ryushi is an intelligent RSS feed aggregator that uses AI to summarize articles 
    cp config.yaml.example config.yaml
    ```
    
-   Edit `config.yaml` to define your digest categories and schedules:
-   ```yaml
-   categories:
-     technology:
-       schedule: "0 6 * * *"      # Daily at 6:00 AM
-     
-     science:
-       schedule: "0 8 * * 1"      # Mondays at 8:00 AM
-   ```
+    Edit `config.yaml` to define your digest categories and schedules:
+    ```yaml
+    categories:
+      technology:
+        schedule: "0 6 * * *"           # Daily at 6:00 AM
+        template_type: digest            # Use built-in digest template
+        language: English
+      
+      science:
+        schedule: "0 8 * * 1"           # Mondays at 8:00 AM
+        template_type: recommendation    # Use recommendation template
+        item_type: research-papers
+        interests:
+          - Machine Learning
+          - AI
+    ```
 
 4. **Start with Docker**
    ```bash
@@ -108,7 +117,7 @@ GET /feeds                         # List all available feeds
 GET /feeds/{slug}/atom.xml         # Get Atom feed for a category
 ```
 
-See [API_ENDPOINTS.md](API_ENDPOINTS.md) for complete documentation with examples.
+See [API_ENDPOINTS.md](docs/API_ENDPOINTS.md) for complete documentation with examples.
 
 ## 🔧 Configuration
 
@@ -126,7 +135,7 @@ See [API_ENDPOINTS.md](API_ENDPOINTS.md) for complete documentation with example
 - `RYUSHI_PORT` - Server port (default: 8000)
 - `RYUSHI_BASE_URL` - External URL for feed links
 
-See [CONFIGURATION.md](CONFIGURATION.md) for detailed setup instructions.
+See [CONFIGURATION.md](docs/CONFIGURATION.md) for detailed setup instructions.
 
 ### AI Provider Configuration
 
@@ -158,22 +167,25 @@ RYUSHI_AI_MODEL=local-model
 RYUSHI_AI_BASE_URL=http://localhost:1234/v1
 ```
 
-See [AI_PROVIDERS.md](AI_PROVIDERS.md) for more provider configurations.
+See [AI_PROVIDERS.md](docs/AI_PROVIDERS.md) for more provider configurations.
 
 ## 📚 Documentation
 
-- **[CONFIGURATION.md](CONFIGURATION.md)** - Complete setup and configuration guide
-- **[API_ENDPOINTS.md](API_ENDPOINTS.md)** - REST API documentation with examples
-- **[AI_PROVIDERS.md](AI_PROVIDERS.md)** - AI provider setup instructions
+- **[CONFIGURATION.md](docs/CONFIGURATION.md)** - Complete setup and configuration guide
+- **[API_ENDPOINTS.md](docs/API_ENDPOINTS.md)** - REST API documentation with examples
+- **[AI_PROVIDERS.md](docs/AI_PROVIDERS.md)** - AI provider setup instructions
+- **[Prompt Templates](docs/prompt-templates.md)** - Guide to built-in and custom prompt templates
 - **[docker-compose.yaml](docker-compose.yaml)** - Docker deployment configuration
+- **[config.yaml.example](config.yaml.example)** - Example configuration with all options explained
 
 ## 🎯 Use Cases
 
-- **Daily News Digests** - Get AI-summarized news from your feeds every morning
-- **Research Aggregation** - Summarize articles from multiple research feeds
-- **Content Curation** - Create curated digests of industry-specific news
-- **Knowledge Base** - Build a searchable archive of digested articles
-- **Email Newsletters** - Feed digests into your email system
+- **Daily News Digests** - Get AI-summarized news from your feeds every morning with HTML formatting
+- **Personalized Recommendations** - Let AI curate items based on your specific interests
+- **Research Aggregation** - Summarize articles from multiple research feeds with custom prompts
+- **Content Curation** - Create curated digests of industry-specific news and publish to GitHub Gists
+- **Knowledge Base** - Build a searchable archive of digested articles with standard Atom feeds
+- **Email Newsletters** - Feed digests into your email system or publish to Gists for sharing
 
 ## 🏗️ Architecture
 
@@ -260,7 +272,7 @@ uv run pytest --cov=ryushi
 uv run pytest tests/digest/test_engine.py
 ```
 
-**Test Coverage:** 243 tests covering all major components
+**Test Coverage:** 300+ tests covering all major components including new prompt templates and Gist publishing features
 
 ## 🔍 Monitoring
 

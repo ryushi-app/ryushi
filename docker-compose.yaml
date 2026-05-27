@@ -26,7 +26,8 @@ services:
       - RYUSHI_AI_BASE_URL=${RYUSHI_AI_BASE_URL:-}
       - RYUSHI_AI_MODEL=${RYUSHI_AI_MODEL:-gpt-4.1-mini}
       
-      # GitHub Gist publishing (optional)
+      # GitHub Gist publishing (optional - only needed if using gist_enabled in config.yaml)
+      # Get token: https://github.com/settings/tokens/new (Fine-grained PAT with "gist" scope)
       - GITHUB_TOKEN=${GITHUB_TOKEN:-}
     volumes:
       # Persist databases and configuration

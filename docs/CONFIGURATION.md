@@ -112,6 +112,44 @@ categories:
 - `*/30 * * * *` - Every 30 minutes
 - `0 0 1 * *` - First day of each month at midnight
 
+### Per-Category Configuration Options
+
+Each category in `config.yaml` supports optional fields for customizing digest generation:
+
+```yaml
+categories:
+  technology:
+    schedule: "0 6 * * *"                    # Required: cron expression
+    language: "English"                      # Optional: output language (default: German)
+    template_type: "digest"                  # Optional: digest or recommendation (default: digest)
+    prompt: |                                # Optional: custom system prompt template
+      You are a tech news expert...
+      Respond in {language}.
+    item_type: "articles"                    # Optional: type of items (for recommendations)
+    interests:                               # Optional: user interests (for recommendations)
+      - AI and Machine Learning
+      - Cloud Computing
+    favicon: "/static/tech.png"              # Optional: feed icon URL
+    gist_enabled: true                       # Optional: publish to GitHub Gist (default: false)
+    gist_id: "abc123def456"                  # Optional: Gist ID (required if gist_enabled: true)
+```
+
+#### Configuration Field Reference
+
+- **schedule** (required): Standard 5-field cron expression
+- **language** (optional, default: "German"): Output language for digests
+- **template_type** (optional, default: "digest"): 
+  - `digest`: News digest template with HTML formatting
+  - `recommendation`: Personalized recommendation template based on interests
+- **prompt** (optional): Custom system prompt template (overrides template_type if provided)
+- **item_type** (optional): Type of items for recommendation template (books, movies, papers, etc.)
+- **interests** (optional): List of user interests for filtering recommendations
+- **favicon** (optional): URL to feed icon displayed by feed readers
+- **gist_enabled** (optional, default: false): Enable publishing to GitHub Gist
+- **gist_id** (optional): GitHub Gist ID for publishing (required if gist_enabled: true)
+
+See [docs/prompt-templates.md](prompt-templates.md) for detailed information on prompt templates.
+
 ### `.env` - Environment Variables
 
 **Purpose:** Configure external services, secrets, and runtime settings
@@ -150,6 +188,15 @@ RYUSHI_AI_BASE_URL=https://api.mammouth.ai/v1
 # Mammouth: mammouth-ai/claude-haiku-4-5
 # Anthropic: claude-3-haiku, claude-3-sonnet
 # Local LM: ollama/llama2, ollama/mistral
+```
+
+**GitHub Gist Publishing:**
+```bash
+# GitHub token for publishing digests to Gists (optional)
+# Only required if using gist_enabled in config.yaml
+# Create token: https://github.com/settings/tokens/new
+# Permissions needed: "gist" scope only
+GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 ```
 
 **Server Configuration:**
@@ -219,34 +266,47 @@ RYUSHI_AI_MODEL=local-model
 RYUSHI_AI_BASE_URL=http://localhost:1234/v1
 ```
 
-### Multiple Categories with Different Schedules
+### Multiple Categories with Different Schedules and Templates
 
 **config.yaml:**
 ```yaml
 categories:
   technology:
-    schedule: "0 6 * * *"        # Daily at 6 AM
+    schedule: "0 6 * * *"                    # Daily at 6 AM
+    template_type: digest                    # Use digest template
+    language: English
 
   science:
-    schedule: "0 8 * * 1"        # Mondays at 8 AM
+    schedule: "0 8 * * 1"                    # Mondays at 8 AM
+    template_type: recommendation            # Use recommendation template
+    item_type: research-papers
+    interests:
+      - Machine Learning
+      - Deep Learning
 
   news:
-    schedule: "0 */6 * * *"      # Every 6 hours
+    schedule: "0 */6 * * *"                  # Every 6 hours
+    gist_enabled: true                       # Publish to Gist
+    gist_id: abc123def456                    # Gist ID
+    favicon: https://example.com/icon.png
 
   books:
-    schedule: "0 10 * * 0"       # Sundays at 10 AM
+    schedule: "0 10 * * 0"                   # Sundays at 10 AM
+    prompt: |                                # Custom prompt
+      You are a book curator...
+      Recommend books in {language}.
 ```
 
 ## Category Name to Slug Conversion
 
 Your FreshRSS category names are automatically converted to slugs (lowercase with hyphens):
 
-| FreshRSS Category | Config Slug | Cron Entry |
-|-------------------|-------------|-----------|
-| Technology | technology | `technology:` |
-| Software Engineering | software-engineering | `software-engineering:` |
-| AI & Machine Learning | ai-machine-learning | `ai-machine-learning:` |
-| News (breaking) | news-breaking | `news-breaking:` |
+| FreshRSS Category     | Config Slug          | Cron Entry              |
+|-----------------------|----------------------|-------------------------|
+| Technology            | technology           | `technology:`           |
+| Software Engineering  | software-engineering | `software-engineering:` |
+| AI & Machine Learning | ai-machine-learning  | `ai-machine-learning:`  |
+| News (breaking)       | news-breaking        | `news-breaking:`        |
 
 ## Docker Compose Configuration
 
@@ -317,19 +377,62 @@ Category 'invalid-slug' not found in FreshRSS
 
 **Solution:** Ensure category slug matches your FreshRSS category (converted to lowercase with hyphens)
 
+## GitHub Gist Publishing Configuration
+
+To publish generated feeds to GitHub Gists:
+
+1. **Create a Personal Access Token:**
+   - Go to https://github.com/settings/tokens/new
+   - Click "Fine-grained personal access token"
+   - Grant only "gist" permission under "Account permissions"
+   - Copy the token
+
+2. **Set Environment Variable:**
+   ```bash
+   GITHUB_TOKEN=ghp_xxxxxxxxxxxx
+   ```
+
+3. **Enable in config.yaml:**
+   ```yaml
+   categories:
+     technology:
+       schedule: "0 6 * * *"
+       gist_enabled: true
+       gist_id: abc123def456      # Your Gist ID from https://gist.github.com/username/abc123def456
+   ```
+
+4. **Get Gist ID:**
+   - Create a new Gist on https://gist.github.com
+   - Copy the ID from the URL
+
+The feed will be published as `{category-slug}.atom.xml` in your Gist, updating on each digest generation.
+
+## Prompt Templates Configuration
+
+Ryushi provides built-in templates for common use cases:
+
+- **digest**: News digest template with HTML formatting (default)
+- **recommendation**: Personalized item recommendations based on user interests
+
+See [docs/prompt-templates.md](prompt-templates.md) for detailed information on:
+- Template options and features
+- Configuration examples for each template type
+- How to create custom prompts
+
 ## Configuration Best Practices
 
-1. **Use `.env` for secrets** - Never commit API keys to version control
-2. **Use `config.yaml` for schedules** - These rarely change and are deployment-independent
+1. **Use `.env` for secrets** - Never commit API keys or tokens to version control
+2. **Use `config.yaml` for schedules and templates** - These rarely change and are deployment-independent
 3. **Environment-specific configs** - Use different `.env` files per environment (dev, staging, prod)
 4. **Document your categories** - Add comments explaining what each category contains
 5. **Start with daily schedules** - Once working, adjust frequency as needed
+6. **Test custom prompts** - Manually trigger jobs to verify prompt output before setting up automation
 
 ## Examples
 
 See the following files for more examples:
 
-- `config.yaml.example` - Scheduler category examples
+- `config.yaml.example` - Scheduler category examples with all configuration options
 - `.env.example` - All available environment variables
-- `AI_PROVIDERS.md` - Configuration for different AI providers
-- `DOCKER_COMPOSE.md` - Docker deployment configuration
+- `docs/prompt-templates.md` - Prompt template examples and customization
+- `docs/AI_PROVIDERS.md` - Configuration for different AI providers
