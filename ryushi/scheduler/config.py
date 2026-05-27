@@ -105,7 +105,7 @@ def parse_config(raw_config: dict) -> ScheduleConfig:
             )
             continue
 
-        # Create CategoryConfig with optional fields (language, prompt, favicon, gist)
+        # Create CategoryConfig with optional fields (language, prompt, favicon, gist, templates)
         try:
             gist_enabled = category_config.get("gist_enabled", False)
             gist_id = category_config.get("gist_id")
@@ -124,6 +124,9 @@ def parse_config(raw_config: dict) -> ScheduleConfig:
                 favicon=category_config.get("favicon"),
                 gist_enabled=gist_enabled,
                 gist_id=gist_id,
+                template_type=category_config.get("template_type"),
+                item_type=category_config.get("item_type"),
+                interests=category_config.get("interests"),
             )
             categories[category_slug] = config
             logger.info(

@@ -300,6 +300,76 @@ class TestParseConfig:
         assert cat.gist_enabled is True
         assert cat.gist_id == "xyz789abc123"
 
+    def test_parse_category_with_template_type(self):
+        """Test parsing category with template_type."""
+        raw = {
+            "categories": {
+                "books": {
+                    "schedule": "0 9 * * *",
+                    "template_type": "recommendation",
+                }
+            }
+        }
+        config = parse_config(raw)
+        cat = config.categories["books"]
+        assert cat.template_type == "recommendation"
+        assert cat.item_type is None
+        assert cat.interests is None
+
+    def test_parse_category_with_template_parameters(self):
+        """Test parsing category with template_type and parameters."""
+        raw = {
+            "categories": {
+                "books": {
+                    "schedule": "0 9 * * *",
+                    "template_type": "recommendation",
+                    "item_type": "books",
+                    "interests": ["Fantasy", "Science Fiction", "Mystery"],
+                }
+            }
+        }
+        config = parse_config(raw)
+        cat = config.categories["books"]
+        assert cat.template_type == "recommendation"
+        assert cat.item_type == "books"
+        assert cat.interests == ["Fantasy", "Science Fiction", "Mystery"]
+
+    def test_parse_category_with_all_fields_including_templates(self):
+        """Test parsing category with all fields including templates."""
+        raw = {
+            "categories": {
+                "recommendations": {
+                    "schedule": "0 10 * * *",
+                    "language": "English",
+                    "template_type": "recommendation",
+                    "item_type": "movies",
+                    "interests": ["Action", "Drama"],
+                    "favicon": "/static/movies.png",
+                    "gist_enabled": True,
+                    "gist_id": "gist123",
+                }
+            }
+        }
+        config = parse_config(raw)
+        cat = config.categories["recommendations"]
+        assert cat.schedule == "0 10 * * *"
+        assert cat.language == "English"
+        assert cat.template_type == "recommendation"
+        assert cat.item_type == "movies"
+        assert cat.interests == ["Action", "Drama"]
+        assert cat.favicon == "/static/movies.png"
+        assert cat.gist_enabled is True
+        assert cat.gist_id == "gist123"
+
+    def test_parse_backward_compatible_no_template_fields(self):
+        """Test that old config without template fields still works."""
+        raw = {"categories": {"legacy": {"schedule": "0 6 * * *"}}}
+        config = parse_config(raw)
+        cat = config.categories["legacy"]
+        assert cat.template_type is None
+        assert cat.item_type is None
+        assert cat.interests is None
+
 
 class TestGetCategorySlugs:
     """Tests for get_category_slugs helper."""
