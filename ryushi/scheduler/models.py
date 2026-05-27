@@ -69,6 +69,9 @@ class CategoryConfig(BaseModel):
         favicon: URL for the category's feed icon (optional).
         gist_enabled: Whether to publish feed to GitHub Gist (default: False).
         gist_id: GitHub Gist ID to publish to (required if gist_enabled=True).
+        template_type: Type of prompt template to use (e.g., "digest", "recommendation"). Optional.
+        item_type: Type of items for recommendation template (e.g., "books", "movies"). Optional.
+        interests: List of user interests for recommendation template. Optional.
     """
 
     schedule: str
@@ -77,6 +80,9 @@ class CategoryConfig(BaseModel):
     favicon: str | None = None
     gist_enabled: bool = False
     gist_id: str | None = None
+    template_type: str | None = None
+    item_type: str | None = None
+    interests: list[str] | None = None
 
 
 class ScheduleConfig(BaseModel):

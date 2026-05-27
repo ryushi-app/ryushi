@@ -19,7 +19,12 @@ from tenacity import (
 
 from .exceptions import DigestError
 from .models import Digest, DigestConfig
-from .prompts import DEFAULT_SYSTEM_PROMPT, build_prompt, format_system_prompt
+from .prompts import (
+    DEFAULT_SYSTEM_PROMPT,
+    build_prompt,
+    format_system_prompt,
+    select_prompt,
+)
 
 if TYPE_CHECKING:
     from ryushi.integrations.freshrss.models import Article
@@ -89,6 +94,9 @@ class DigestEngine:
         category_name: str,
         language: str | None = None,
         custom_prompt: str | None = None,
+        template_type: str | None = None,
+        item_type: str | None = None,
+        interests: list[str] | None = None,
     ) -> Digest | None:
         """Generate a digest from a list of articles.
 
@@ -98,7 +106,10 @@ class DigestEngine:
             articles: List of Article objects to summarize.
             category_name: Name of the category being digested.
             language: Optional language override (defaults to config language).
-            custom_prompt: Optional custom system prompt template (defaults to config prompt).
+            custom_prompt: Optional custom system prompt template (takes priority).
+            template_type: Optional template type (e.g., "digest", "recommendation").
+            item_type: Optional item type for recommendation templates.
+            interests: Optional list of user interests for recommendation templates.
 
         Returns:
             Digest object with AI-generated summary, or None if no articles.
@@ -121,15 +132,14 @@ class DigestEngine:
             logger.warning("No articles fit in context window")
             return None
 
-        # Format system prompt with language and custom prompt overrides
+        # Select and render system prompt with language and optional overrides
         effective_language = language or self.config.language
-        effective_prompt_template = (
-            custom_prompt or self.config.system_prompt or DEFAULT_SYSTEM_PROMPT
-        )
-
-        system_prompt = format_system_prompt(
-            effective_prompt_template,
+        system_prompt = select_prompt(
+            custom_prompt=custom_prompt or self.config.system_prompt,
+            template_type=template_type,
             language=effective_language,
+            item_type=item_type,
+            interests=interests,
         )
 
         # Make the AI call

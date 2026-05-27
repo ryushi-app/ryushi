@@ -5,10 +5,14 @@ from unittest.mock import MagicMock
 
 from ryushi.digest.prompts import (
     DEFAULT_SYSTEM_PROMPT,
+    PROMPT_TEMPLATES,
     build_prompt,
     estimate_tokens,
     format_system_prompt,
     get_context_window,
+    get_template,
+    render_template,
+    select_prompt,
 )
 
 
@@ -176,3 +180,206 @@ class TestBuildPrompt:
         prompt, _ = build_prompt(articles, "News")
 
         assert "Total articles: 15" in prompt
+
+
+class TestGetTemplate:
+    """Tests for template registry lookup."""
+
+    def test_digest_template_exists(self):
+        """Digest template can be retrieved."""
+        template = get_template("digest")
+        assert template is not None
+        assert isinstance(template, str)
+        assert "digest" in template.lower()
+
+    def test_recommendation_template_exists(self):
+        """Recommendation template can be retrieved."""
+        template = get_template("recommendation")
+        assert template is not None
+        assert isinstance(template, str)
+        assert "curator" in template.lower() or "interest" in template.lower()
+
+    def test_unknown_template(self):
+        """Returns None for unknown template type."""
+        template = get_template("unknown-type")
+        assert template is None
+
+    def test_template_registry_contains_expected_types(self):
+        """Registry contains expected template types."""
+        assert "digest" in PROMPT_TEMPLATES
+        assert "recommendation" in PROMPT_TEMPLATES
+
+
+class TestRenderTemplate:
+    """Tests for template rendering with parameter substitution."""
+
+    def test_language_substitution(self):
+        """Substitutes {language} placeholder."""
+        template = "Write in {language}."
+        result = render_template(template, language="Spanish")
+        assert result == "Write in Spanish."
+
+    def test_language_default(self):
+        """Uses German as default language."""
+        template = "Write in {language}."
+        result = render_template(template)
+        assert result == "Write in German."
+
+    def test_item_type_substitution(self):
+        """Substitutes {item_type} placeholder."""
+        template = "Recommend {item_type}."
+        result = render_template(template, item_type="books")
+        assert result == "Recommend books."
+
+    def test_item_type_default(self):
+        """Uses 'items' as default item_type."""
+        template = "Recommend {item_type}."
+        result = render_template(template)
+        assert result == "Recommend items."
+
+    def test_interests_substitution(self):
+        """Substitutes {interests} with formatted list."""
+        template = "User interests:\n{interests}"
+        result = render_template(
+            template,
+            interests=["Fantasy", "Science Fiction", "Mystery"],
+        )
+        assert "- Fantasy" in result
+        assert "- Science Fiction" in result
+        assert "- Mystery" in result
+
+    def test_interests_empty(self):
+        """Uses default message for empty interests."""
+        template = "Interests:\n{interests}"
+        result = render_template(template, interests=[])
+        assert "(No specific interests provided)" in result
+
+    def test_interests_none(self):
+        """Uses default message for None interests."""
+        template = "Interests:\n{interests}"
+        result = render_template(template, interests=None)
+        assert "(No specific interests provided)" in result
+
+    def test_digest_template_rendering(self):
+        """Renders digest template with language substitution."""
+        template = get_template("digest")
+        result = render_template(template, language="English")
+        assert "English" in result
+
+    def test_digest_template_has_html_formatting(self):
+        """Digest template uses HTML formatting."""
+        template = get_template("digest")
+        assert "<h2>" in template
+        assert "<ul>" in template
+        assert "<li>" in template
+        assert "<a href=" in template
+        assert "<strong>" in template
+        assert "<hr>" in template
+
+    def test_recommendation_template_rendering(self):
+        """Renders recommendation template with all parameters."""
+        template = get_template("recommendation")
+        result = render_template(
+            template,
+            language="English",
+            item_type="movies",
+            interests=["Action", "Drama"],
+        )
+        assert "English" in result
+        assert "- Action" in result
+        assert "- Drama" in result
+
+    def test_recommendation_template_has_html_formatting(self):
+        """Recommendation template uses HTML formatting."""
+        template = get_template("recommendation")
+        assert "<h2>" in template
+        assert "<ol>" in template
+        assert "<li>" in template
+        assert "<a href=" in template
+        assert "<em>" in template
+        assert "<hr>" in template
+
+    def test_recommendation_template_uses_item_type(self):
+        """Recommendation template includes {item_type} placeholder."""
+        template = get_template("recommendation")
+        assert "{item_type}" in template
+        # Verify it's used in the heading
+        assert "Recommended {item_type}" in template
+
+    def test_recommendation_template_output_includes_item_type(self):
+        """Rendered recommendation output includes the item_type."""
+        template = get_template("recommendation")
+        result = render_template(
+            template,
+            language="English",
+            item_type="books",
+            interests=["Fiction"],
+        )
+        assert "Recommended books" in result
+
+
+class TestSelectPrompt:
+    """Tests for prompt selection priority logic."""
+
+    def test_custom_prompt_takes_priority(self):
+        """Custom prompt takes priority over template_type."""
+        custom = "This is custom."
+        result = select_prompt(
+            custom_prompt=custom,
+            template_type="digest",
+            language="German",
+        )
+        assert "This is custom." in result
+
+    def test_template_type_when_no_custom(self):
+        """Uses template_type when custom_prompt is None."""
+        result = select_prompt(
+            custom_prompt=None,
+            template_type="digest",
+            language="English",
+        )
+        # Digest template should be included
+        assert "digest" in result.lower() or "summarize" in result.lower()
+
+    def test_default_when_no_custom_or_template(self):
+        """Falls back to default when neither custom nor template_type provided."""
+        result = select_prompt(
+            custom_prompt=None,
+            template_type=None,
+            language="German",
+        )
+        # Should return a prompt
+        assert len(result) > 0
+
+    def test_invalid_template_type_fallback(self):
+        """Falls back to default for invalid template_type."""
+        result = select_prompt(
+            custom_prompt=None,
+            template_type="invalid-type",
+            language="English",
+        )
+        # Should still return a prompt (fallback to default)
+        assert len(result) > 0
+
+    def test_template_parameters_forwarded(self):
+        """Forwards item_type and interests to template rendering."""
+        result = select_prompt(
+            custom_prompt=None,
+            template_type="recommendation",
+            language="English",
+            item_type="books",
+            interests=["Fantasy", "Mystery"],
+        )
+        # Should contain the interests
+        assert "- Fantasy" in result
+        assert "- Mystery" in result
+
+    def test_language_parameter_applied(self):
+        """Language parameter is applied to selected prompt."""
+        result = select_prompt(
+            custom_prompt=None,
+            template_type="digest",
+            language="Spanish",
+        )
+        # Should contain the language
+        assert "Spanish" in result
