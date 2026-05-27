@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Execute digest generation jobs for categories: fetch articles, generate digests, store feeds, and optionally publish to GitHub Gists.
+
+## Requirements
 
 ### Requirement: Execute digest pipeline
 The system SHALL run Fetcher → Digest Engine → Feed Generator as a sequential pipeline for each job.

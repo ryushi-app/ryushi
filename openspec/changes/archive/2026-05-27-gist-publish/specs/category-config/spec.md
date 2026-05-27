@@ -27,9 +27,4 @@ The system SHALL extend the `CategoryConfig` Pydantic model to include gist_enab
 - **WHEN** config YAML omits gist_enabled and gist_id for a category
 - **THEN** CategoryConfig model is created with defaults (gist_enabled=False, gist_id=None)
 
-### Requirement: Backward-compatible config loading
-The system SHALL accept existing config.yaml files without Gist fields, applying default values.
 
-#### Scenario: Legacy config format
-- **WHEN** config YAML uses the existing format without Gist fields
-- **THEN** config loads successfully with gist_enabled=False for all categories
