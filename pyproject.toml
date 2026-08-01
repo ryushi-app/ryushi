@@ -9,7 +9,7 @@ description = "AI-powered RSS digest service for FreshRSS"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.115,<0.137",
-    "uvicorn[standard]>=0.32,<0.47",
+    "uvicorn[standard]>=0.32,<0.52",
     "httpx>=0.28,<0.29",
     "litellm>=1.55,<2.0",
     "tenacity>=8.2,<10.0",
