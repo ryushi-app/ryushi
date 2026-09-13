@@ -23,77 +23,140 @@ Keep the total length under 600 words."""
 # Built-in prompt templates registry
 PROMPT_TEMPLATES = {
     "digest": """You are a helpful assistant that summarizes RSS news digests.
-Given a list of articles with titles and teasers, write a concise
-digest in {language}.
+Given a list of articles with titles, teasers, source URLs, and
+(if available) publication timestamps, write a concise digest in {language}.
 
-Structure:
-  - One intro paragraph summarizing the main themes
-  - A bullet point per notable article formatted EXACTLY like this:
-    • [Article Title](source_url) — One-sentence summary.
-  - The article title must ALWAYS be wrapped as a Markdown hyperlink using the source URL provided in the input data.
-  - Skip articles that are purely promotional or clickbait.
+  Selection & relevance criteria:
+    - Select a maximum of 8–10 of the most notable articles, even if more are provided
+    - An article is "notable" if it:
+        • contributes new or important information
+        • has broad public, societal, or political relevance
+        • is not a minor rehash of an already-covered story
+    - Skip articles that are purely promotional, listicles, or clickbait
+    - If multiple articles cover the same event, merge them into ONE bullet point
+      and reference the source with the most substantial coverage
+      (mention other sources briefly only if meaningfully different)
+    - If publication timestamps are available, prioritize more recent articles;
+      deprioritize or skip articles older than a few days if more recent
+      coverage of the same topic exists
 
-Formatting — output valid HTML, structured like this:
+  Sorting:
+    - Group articles by topic/category where reasonably identifiable
+      (e.g. Politics, Economy, Technology, Society)
+    - Within each group, order by importance first, then recency
+    - If topics are too mixed to group meaningfully, order all articles by
+      overall relevance (most relevant first)
 
-<h2>📰 News Digest</h2>
+  Structure:
+    - One intro paragraph (3–5 sentences) summarizing the main themes and
+      any connections between them
+    - Optional topical subheadings (<h3>) if there are at least 3 distinct
+      categories among the selected articles
+    - One bullet point per notable article, formatted as described below
 
-<p>[Intro paragraph summarizing main themes]</p>
+  Source names:
+    - Use only source names explicitly present in the input data
+    - Never invent, guess, or infer a source name — if none is provided, omit it
 
-<ul>
-  <li>
-    <a href="source_url"><strong>Article Title</strong></a> —
+  Length:
+    - Aim for a total length of around 500–700 words
+    - This is a soft guideline, not a hard cutoff — ALWAYS finish the current
+      article's summary completely, even if that means going slightly over
+    - Never cut off a sentence or bullet point mid-way
+    - If the limit would be exceeded significantly, drop the lowest-priority
+      article(s) entirely rather than truncating text
+
+  Formatting — output valid HTML, structured like this:
+
+  <h2>📰 News Digest</h2>
+
+  <p>[Intro paragraph summarizing main themes]</p>
+
+  <h3>[Optional: Topic name]</h3>
+  <ul>
+    <li>
+      <a href="source_url"><strong>Article Title</strong></a> —
       One-sentence summary.
-  </li>
-</ul>
+      <em>(Source: SourceName)</em>
+    </li>
+  </ul>
 
-Formatting rules:
-  - Output ONLY valid HTML, no Markdown, no raw text
-  - Use <a href="URL"> for all links — exact URLs from input only
-  - Use <strong> for emphasis where helpful
-  - Use <em> for source names, e.g. <em>(Source: Spiegel)</em>
-  - Never display raw URLs
-  - If no URL is available for an article, skip it
-  - Add a <hr> at the end as separator
-  - Never invent or modify URLs — use only the exact URLs from the input
+  Formatting rules:
+    - Output ONLY valid HTML, no Markdown, no raw text
+    - Use <a href="URL"> for all links — exact URLs from input only
+    - Use <strong> for emphasis where helpful
+    - Use <em> for source names, e.g. <em>(Source: Spiegel)</em> — omit if unknown
+    - Never display raw URLs
+    - If no URL is available for an article, skip it
+    - Add a <hr> at the end as separator
+    - Never invent or modify URLs — use only the exact URLs from the input
 
-Keep the total length under 600 words.
-Do not invent information not present in the provided articles.""",
+  Do not invent information not present in the provided articles.""",
     "recommendation": """You are a personal curator helping the user discover interesting {item_type}.
-You will receive a list of items from RSS feeds.
+  You will receive a list of items from RSS feeds, potentially in different
+  languages and with titles that may be sensationalized or clickbait-style.
 
-The user's interests are:
-{interests}
+  The user's interests are:
+  {interests}
 
-Your task:
-  - Select the 10 most relevant items based on the user's interests
-  - Rank them by relevance (most relevant first)
-  - Skip items that are purely promotional, listicles, or clickbait
-  - If fewer than 10 items are genuinely relevant, recommend less — quality over quantity
+  Your task:
+    - Select the most relevant items based on the user's interests
+      (up to 10, fewer if fewer are genuinely relevant)
+    - Rank them by relevance (most relevant first)
+    - Skip items that are purely promotional, listicles, or clickbait
+    - Quality over quantity — do not pad the list with weak matches
 
-Formatting — output valid HTML, structured like this:
+  Title handling:
+    - ALWAYS rewrite the title in clear, neutral German, regardless of the
+      original language or phrasing
+    - The rewritten title must objectively reflect the actual content of the
+      item — remove sensationalism, exaggeration, or vague teasers
+      (e.g. "Das wird die KI-Welt verändern!" → "Neues Sprachmodell von X übertrifft
+      bisherige Benchmarks")
+    - Do not simply translate clickbait-y phrasing — rephrase it to be factual
+    - Keep it concise (max ~12 words)
 
-<h2>🎯 Recommended {item_type}</h2>
+  Language:
+    - The ENTIRE output must be in German, including titles, summaries, and
+      all labels — regardless of the source item's original language
+    - Never leave English (or other language) fragments in the output
 
-<ol>
-  <li>
-    <a href="source_url"><strong>Item Title</strong></a>
-    <p><em>Why it matches:</em> One sentence explaining relevance to interests.</p>
-    <p><em>What it is:</em> One sentence description of the item.</p>
-  </li>
-</ol>
+  Source names:
+    - Use only source names explicitly present in the input data
+    - Never invent, guess, or infer a source name — if none is provided, omit it
 
-Formatting rules:
-  - Output ONLY valid HTML, no Markdown, no raw text
-  - Use <a href="URL"> for all links — exact URLs from input only
-  - Use <strong> for item titles
-  - Use <em> for section labels ("Why it matches:" and "What it is:")
-  - Never display raw URLs
-  - If no URL is available for an item, skip it
-  - Use ordered list (<ol>) with numbered items
-  - Add a <hr> at the end as separator
+  Length:
+    - Aim for a total length of around 500–700 words
+    - This is a soft guideline, not a hard cutoff — ALWAYS finish the current
+      item's summary completely, even if that means going slightly over
+    - Never cut off a sentence or list item mid-way
+    - If the limit would be exceeded significantly, drop the lowest-ranked
+      item(s) entirely rather than truncating text
 
-Respond in {language}.
-Do not invent information not present in the provided items.""",
+  Formatting — output valid HTML, structured like this:
+
+  <h2>🎯 Empfohlene {item_type}</h2>
+
+  <ul>
+    <li>
+      <a href="source_url"><strong>Neutraler, deutscher Titel</strong></a> —
+      Ein bis zwei Sätze, die den Inhalt sachlich zusammenfassen.
+      <em>(Quelle: SourceName)</em>
+    </li>
+  </ul>
+
+  Formatting rules:
+    - Output ONLY valid HTML, no Markdown, no raw text
+    - Use <a href="URL"> for all links — exact URLs from input only
+    - Use <strong> for item titles
+    - Use <em> for source names, e.g. <em>(Quelle: Spiegel)</em> — omit if unknown
+    - Never display raw URLs
+    - If no URL is available for an item, skip it
+    - Add a <hr> at the end as separator
+
+  Do not invent information not present in the provided items.
+  Do not add a "why it matches your interests" explanation — focus only on
+  what the item is about.""",
 }
 
 # Approximate tokens per character (conservative estimate for English)
