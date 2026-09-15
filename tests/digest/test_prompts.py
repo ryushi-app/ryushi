@@ -293,7 +293,7 @@ class TestRenderTemplate:
         """Recommendation template uses HTML formatting."""
         template = get_template("recommendation")
         assert "<h2>" in template
-        assert "<ol>" in template
+        assert "<ul>" in template
         assert "<li>" in template
         assert "<a href=" in template
         assert "<em>" in template
@@ -303,8 +303,7 @@ class TestRenderTemplate:
         """Recommendation template includes {item_type} placeholder."""
         template = get_template("recommendation")
         assert "{item_type}" in template
-        # Verify it's used in the heading
-        assert "Recommended {item_type}" in template
+        assert "Empfohlene {item_type}" in template
 
     def test_recommendation_template_output_includes_item_type(self):
         """Rendered recommendation output includes the item_type."""
@@ -315,7 +314,7 @@ class TestRenderTemplate:
             item_type="books",
             interests=["Fiction"],
         )
-        assert "Recommended books" in result
+        assert "Empfohlene books" in result
 
 
 class TestSelectPrompt:
