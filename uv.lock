@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.13"
 resolution-markers = [
     "python_full_version >= '3.15'",
@@ -237,11 +237,11 @@ filecache = [
 
 [[package]]
 name = "certifi"
-version = "2026.5.20"
+version = "2026.10.18"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f3/ce/ee2ecad540810a79593028e88299baeae54d346cc7a0d94b6199988b89b1/certifi-2026.5.20.tar.gz", hash = "sha256:69dea482ab64caa7b9f6aba1c6bf48bb6a5448d1c0f1b17ab42ad8c763a5344d", size = 135422, upload-time = "2026-05-20T11:46:50.073Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7e/eb/a2aa1ac3ea30dd3f30ca57f40232138b6b0040719316ecb85daf61167771/certifi-2026.10.18.tar.gz", hash = "sha256:b9995d97b64d0431a5af837d8ca8cd6238104d1f319f04bd93ea43124d6c861e", size = 135227, upload-time = "2026-10-18T16:21:07.655Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/59/8c/57e832b7af6d7c5abe66eb3fbe3a3a32f4d11ea23a1aa7131371035be991/certifi-2026.5.20-py3-none-any.whl", hash = "sha256:3c52e209ba0a4ad7aebe60436a4ab349c39e1e602e8c134221e546902ad25897", size = 134134, upload-time = "2026-05-20T11:46:48.578Z" },
+    { url = "https://files.pythonhosted.org/packages/08/ba/95dd616042484f7c83a06974388b37b837732740ee70bc5dc715b5fcd55a/certifi-2026.10.18-py3-none-any.whl", hash = "sha256:73191c47aaa79da394e8fee2dbc2ec827432cab56311122c9e47abf79e390f62", size = 134093, upload-time = "2026-10-18T16:21:06.276Z" },
 ]
 
 [[package]]
@@ -1911,8 +1911,8 @@ dev = [
 requires-dist = [
     { name = "aiosqlite", specifier = ">=0.19,<1.0" },
     { name = "apscheduler", specifier = ">=3.10,<4.0" },
-    { name = "croniter", specifier = ">=2.0,<4.0" },
-    { name = "fastapi", specifier = ">=0.115,<0.141" },
+    { name = "croniter", specifier = ">=2.0,<7.0" },
+    { name = "fastapi", specifier = ">=0.115,<0.163" },
     { name = "feedgen", specifier = ">=1.0,<2.0" },
     { name = "httpx", specifier = ">=0.28,<0.29" },
     { name = "litellm", specifier = ">=1.55,<2.0" },
@@ -1931,7 +1931,7 @@ requires-dist = [
     { name = "types-croniter", marker = "extra == 'dev'", specifier = ">=2.0" },
     { name = "types-pyyaml", marker = "extra == 'dev'", specifier = ">=6.0" },
     { name = "urllib3", specifier = ">=2.7.0" },
-    { name = "uvicorn", extras = ["standard"], specifier = ">=0.32,<0.53" },
+    { name = "uvicorn", extras = ["standard"], specifier = ">=0.32,<0.55" },
 ]
 provides-extras = ["dev"]
 
