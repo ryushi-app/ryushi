@@ -37,16 +37,10 @@ class FeedError(Exception):
 class FeedNotFoundError(FeedError):
     """Raised when a requested feed category does not exist."""
 
-    pass
-
 
 class FeedStorageError(FeedError):
     """Raised when feed storage operations fail."""
 
-    pass
-
 
 class FeedGenerationError(FeedError):
     """Raised when feed XML generation fails."""
-
-    pass

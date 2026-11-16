@@ -57,13 +57,14 @@ THEN uses custom prompt instead of default
 
 ```python
 class Digest(BaseModel):
-    id: str                     # uuid
+    id: str  # uuid
     category_name: str
     generated_at: datetime
-    summary: str                # AI-generated markdown
+    summary: str  # AI-generated markdown
     article_count: int
     source_urls: list[str]
     model_used: str
+
 
 class DigestError(Exception):
     pass

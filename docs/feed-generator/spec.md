@@ -58,11 +58,13 @@ class FeedEntry(BaseModel):
     category_slug: str
     title: str
     published: datetime
-    content_html: str           # markdown rendered to HTML
+    content_html: str  # markdown rendered to HTML
     source_urls: list[str]
+
 
 class FeedIndex(BaseModel):
     feeds: list[FeedMeta]
+
 
 class FeedMeta(BaseModel):
     category: str

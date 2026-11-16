@@ -53,6 +53,9 @@ markers = [
 line-length = 100
 target-version = "py313"
 
+[tool.ruff.lint]
+ignore = ["EXE002"]
+
 [tool.mypy]
 python_version = "3.13"
 warn_return_any = true

@@ -21,11 +21,11 @@ from .exceptions import AuthError, FetchError, FreshRSSError, RateLimitError
 from .models import Article, Category
 
 __all__ = [
-    "FreshRSSClient",
     "Article",
-    "Category",
-    "FreshRSSError",
     "AuthError",
+    "Category",
     "FetchError",
+    "FreshRSSClient",
+    "FreshRSSError",
     "RateLimitError",
 ]

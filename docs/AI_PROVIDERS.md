@@ -178,6 +178,7 @@ To debug AI provider configuration issues:
 4. **Verify LiteLLM can reach the endpoint:**
    ```python
    import litellm
+
    litellm.api_base = "https://api.mammouth.ai/v1"
    litellm.api_key = "your-api-key"
    # Will raise an error if endpoint is unreachable

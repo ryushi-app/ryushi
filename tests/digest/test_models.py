@@ -1,6 +1,6 @@
 """Tests for digest Pydantic models."""
 
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 from pydantic import ValidationError
@@ -156,7 +156,7 @@ class TestDigest:
         digest = Digest(
             id="test-uuid",
             category_name="Tech",
-            generated_at=datetime(2024, 1, 15, 10, 30, 0, tzinfo=timezone.utc),
+            generated_at=datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC),
             summary="Test summary",
             article_count=10,
             source_urls=["https://example.com"],

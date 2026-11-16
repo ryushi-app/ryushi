@@ -195,7 +195,7 @@ class DigestScheduler:
                 gist_enabled=gist_enabled,
                 gist_id=gist_id,
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - isolate failures to this scheduled job
             logger.error("Error running job for '%s': %s", category_slug, e)
 
     async def _check_overdue_jobs(self) -> None:
@@ -230,7 +230,7 @@ class DigestScheduler:
                     )
                     asyncio.create_task(self._run_job(category_slug))
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 - continue checking other scheduled jobs
                 logger.error(
                     "Error checking overdue status for '%s': %s",
                     category_slug,
@@ -282,7 +282,7 @@ class DigestScheduler:
                     status="success",
                     article_count=article_count,
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 - record any execution failure in job history
                 await self.job_store.complete_run(
                     job_id=job_run.id,
                     status="failed",
@@ -345,7 +345,7 @@ class DigestScheduler:
             try:
                 status = await self.get_job_status(category_slug)
                 statuses.append(status)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 - continue collecting other job statuses
                 logger.error("Error getting status for '%s': %s", category_slug, e)
 
         return statuses

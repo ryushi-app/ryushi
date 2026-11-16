@@ -8,7 +8,7 @@ import html
 import logging
 import os
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import httpx
@@ -380,7 +380,7 @@ class FreshRSSClient:
             try:
                 await self._mark_as_read_batch(batch)
                 logger.info("Successfully marked %d articles as read", len(batch))
-            except Exception as e:
+            except (AuthError, FetchError, RateLimitError, httpx.HTTPError) as e:
                 logger.warning(
                     "Failed to mark %d articles as read: %s",
                     len(batch),
@@ -475,7 +475,7 @@ class FreshRSSClient:
             published_timestamp = item.get("published", item.get("crawlTimeMsec", 0))
             if isinstance(published_timestamp, str):
                 published_timestamp = int(published_timestamp) // 1000
-            published_at = datetime.fromtimestamp(published_timestamp, tz=timezone.utc)
+            published_at = datetime.fromtimestamp(published_timestamp, tz=UTC)
 
             # Extract content and create teaser
             content = ""
@@ -507,7 +507,15 @@ class FreshRSSClient:
                 feed_title=feed_title,
             )
 
-        except Exception as e:
+        except (
+            AttributeError,
+            IndexError,
+            KeyError,
+            OSError,
+            OverflowError,
+            TypeError,
+            ValueError,
+        ) as e:
             logger.warning("Failed to parse article: %s", e)
             return None
 

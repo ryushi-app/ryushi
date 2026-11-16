@@ -58,7 +58,7 @@ class Article(BaseModel):
     url: str
     author: str | None
     published_at: datetime
-    teaser: str | None          # first 500 chars of content
+    teaser: str | None  # first 500 chars of content
     category_id: str
     feed_title: str
 ```
