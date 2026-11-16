@@ -65,6 +65,7 @@ class JobRun(BaseModel):
     article_count: int | None
     error: str | None
 
+
 class JobStatus(BaseModel):
     category_slug: str
     last_run: datetime | None
