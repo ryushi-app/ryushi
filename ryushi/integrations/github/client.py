@@ -61,7 +61,7 @@ class GistPublisher:
             logger.debug("Successfully published to Gist %s", gist_id)
         except GistPublishError as e:
             logger.warning("Failed to publish to Gist %s: %s", gist_id, e.message)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - log unexpected failures at the best-effort publishing boundary
             logger.warning("Unexpected error publishing to Gist %s: %s", gist_id, str(e))
 
     async def _update_gist(self, gist_id: str, filename: str, content: str) -> None:
@@ -117,7 +117,7 @@ class GistPublisher:
                                 gist_id=gist_id,
                                 status_code=403,
                             )
-                    except Exception:
+                    except (TypeError, ValueError):
                         pass
                     raise GistPublishError(
                         "GitHub API forbidden (rate limited or insufficient permissions)",
@@ -146,11 +146,11 @@ class GistPublisher:
 
         except httpx.TimeoutException as e:
             raise GistPublishError(
-                f"Request timeout: {str(e)}",
+                f"Request timeout: {e!s}",
                 gist_id=gist_id,
             ) from e
         except httpx.RequestError as e:
             raise GistPublishError(
-                f"Network error: {str(e)}",
+                f"Network error: {e!s}",
                 gist_id=gist_id,
             ) from e

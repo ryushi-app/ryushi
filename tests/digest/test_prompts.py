@@ -2,7 +2,6 @@
 
 from unittest.mock import MagicMock
 
-
 from ryushi.digest.prompts import (
     DEFAULT_SYSTEM_PROMPT,
     PROMPT_TEMPLATES,

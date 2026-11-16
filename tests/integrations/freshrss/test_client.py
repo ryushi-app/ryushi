@@ -224,12 +224,14 @@ class TestTokenRefresh:
                 return make_response(401)
             return make_response(200, json=CATEGORIES_RESPONSE)
 
-        with patch.object(httpx.AsyncClient, "request", new_callable=AsyncMock) as mock_req:
-            with patch.object(httpx.AsyncClient, "post", new_callable=AsyncMock) as mock_post:
-                mock_req.side_effect = mock_request
-                mock_post.return_value = make_response(200, text=AUTH_RESPONSE)
+        with (
+            patch.object(httpx.AsyncClient, "request", new_callable=AsyncMock) as mock_req,
+            patch.object(httpx.AsyncClient, "post", new_callable=AsyncMock) as mock_post,
+        ):
+            mock_req.side_effect = mock_request
+            mock_post.return_value = make_response(200, text=AUTH_RESPONSE)
 
-                categories = await client.get_categories()
+            categories = await client.get_categories()
 
         assert len(categories) == 2
         assert client._auth_token == "test-auth-token"
@@ -239,13 +241,15 @@ class TestTokenRefresh:
         client = FreshRSSClient()
         client._auth_token = "bad-token"
 
-        with patch.object(httpx.AsyncClient, "request", new_callable=AsyncMock) as mock_req:
-            with patch.object(httpx.AsyncClient, "post", new_callable=AsyncMock) as mock_post:
-                mock_req.return_value = make_response(401)
-                mock_post.return_value = make_response(200, text=AUTH_RESPONSE)
+        with (
+            patch.object(httpx.AsyncClient, "request", new_callable=AsyncMock) as mock_req,
+            patch.object(httpx.AsyncClient, "post", new_callable=AsyncMock) as mock_post,
+        ):
+            mock_req.return_value = make_response(401)
+            mock_post.return_value = make_response(200, text=AUTH_RESPONSE)
 
-                with pytest.raises(AuthError) as exc_info:
-                    await client.get_categories()
+            with pytest.raises(AuthError) as exc_info:
+                await client.get_categories()
 
         assert "after token refresh" in str(exc_info.value).lower()
 

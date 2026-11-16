@@ -37,22 +37,14 @@ class SchedulerError(Exception):
 class JobNotFoundError(SchedulerError):
     """Raised when a requested job or category does not exist."""
 
-    pass
-
 
 class JobAlreadyRunningError(SchedulerError):
     """Raised when attempting to start a job that is already running."""
-
-    pass
 
 
 class JobExecutionError(SchedulerError):
     """Raised when job execution fails."""
 
-    pass
-
 
 class ConfigurationError(SchedulerError):
     """Raised when scheduler configuration is invalid."""
-
-    pass

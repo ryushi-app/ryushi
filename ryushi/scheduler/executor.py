@@ -138,7 +138,7 @@ class JobExecutor:
             history = await self.job_store.get_history(category_slug, limit=1)
             return history[0] if history else job_run
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - persist any execution failure as a failed job
             # Log full traceback
             error_traceback = traceback.format_exc()
             logger.error(
@@ -309,7 +309,7 @@ class JobExecutor:
                 gist_id,
                 category_slug,
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - Gist publishing is best-effort
             logger.warning(
                 "Failed to publish to Gist for category '%s': %s",
                 category_slug,

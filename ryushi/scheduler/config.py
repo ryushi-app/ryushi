@@ -136,7 +136,7 @@ def parse_config(raw_config: dict) -> ScheduleConfig:
                 config.language,
                 config.gist_enabled,
             )
-        except Exception as e:
+        except (AttributeError, KeyError, TypeError, ValueError) as e:
             logger.error(
                 "Failed to parse config for category '%s': %s, skipping",
                 category_slug,

@@ -50,16 +50,10 @@ def _is_retryable_error(exception: BaseException) -> bool:
     if hasattr(exception, "status_code"):
         status = exception.status_code
         # Retry on rate limit and server errors
-        if status == 429 or status >= 500:
-            return True
-        # Don't retry on client errors
-        return False
+        return status == 429 or status >= 500
 
     # Retry on timeout errors
-    if "timeout" in str(exception).lower():
-        return True
-
-    return False
+    return "timeout" in str(exception).lower()
 
 
 class DigestEngine:

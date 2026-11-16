@@ -8,10 +8,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from ryushi.digest.models import Digest
+from ryushi.feeds.store import FeedStore
 from ryushi.integrations.freshrss.models import Article, Category
 from ryushi.scheduler.executor import JobExecutor
 from ryushi.scheduler.store import JobStore
-from ryushi.feeds.store import FeedStore
 
 
 @pytest.fixture

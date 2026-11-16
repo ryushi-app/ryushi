@@ -21,8 +21,8 @@ from .exceptions import DigestError
 from .models import Digest, DigestConfig
 
 __all__ = [
-    "DigestEngine",
     "Digest",
     "DigestConfig",
+    "DigestEngine",
     "DigestError",
 ]

@@ -180,7 +180,7 @@ def create_app(
                 content=json.dumps(health_data),
                 media_type=CONTENT_TYPE_JSON,
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - return a health-check failure for any backend error
             logger.error("Health check failed: %s", e)
             return Response(
                 content='{"status": "error"}',

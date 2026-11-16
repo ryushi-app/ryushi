@@ -3,4 +3,4 @@
 from .client import GistPublisher
 from .exceptions import GistPublishError
 
-__all__ = ["GistPublisher", "GistPublishError"]
+__all__ = ["GistPublishError", "GistPublisher"]

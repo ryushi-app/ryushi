@@ -8,8 +8,6 @@ when interacting with FreshRSS servers.
 class FreshRSSError(Exception):
     """Base exception for all FreshRSS errors."""
 
-    pass
-
 
 class AuthError(FreshRSSError):
     """Raised when authentication with FreshRSS fails.
@@ -17,8 +15,6 @@ class AuthError(FreshRSSError):
     This includes invalid credentials, missing environment variables,
     or persistent 401 responses after token refresh attempts.
     """
-
-    pass
 
 
 class FetchError(FreshRSSError):
@@ -46,5 +42,3 @@ class RateLimitError(FreshRSSError):
 
     Callers should implement backoff/retry logic when catching this error.
     """
-
-    pass

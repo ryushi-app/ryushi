@@ -38,19 +38,15 @@ from ryushi.feeds.models import FeedEntry, FeedIndex, FeedMeta
 from ryushi.feeds.store import FeedStore
 
 __all__ = [
-    # Core classes
-    "FeedGenerator",
-    "FeedStore",
-    # Models
     "FeedEntry",
-    "FeedMeta",
-    "FeedIndex",
-    # Exceptions
     "FeedError",
     "FeedGenerationError",
+    "FeedGenerator",
+    "FeedIndex",
+    "FeedMeta",
     "FeedNotFoundError",
     "FeedStorageError",
-    # Utilities
+    "FeedStore",
     "digest_to_entry",
     "generate_slug",
     "render_markdown_to_html",

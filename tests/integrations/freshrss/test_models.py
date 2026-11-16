@@ -1,6 +1,6 @@
 """Tests for FreshRSS Pydantic models."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 from pydantic import ValidationError
@@ -44,7 +44,7 @@ class TestArticle:
             title="Test Article",
             url="https://example.com/article",
             author="John Doe",
-            published_at=datetime(2024, 1, 15, 10, 30, 0, tzinfo=timezone.utc),
+            published_at=datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC),
             teaser="This is the article content preview...",
             category_id="user/-/label/Tech",
             feed_title="Example Blog",
@@ -53,7 +53,7 @@ class TestArticle:
         assert article.title == "Test Article"
         assert article.url == "https://example.com/article"
         assert article.author == "John Doe"
-        assert article.published_at == datetime(2024, 1, 15, 10, 30, 0, tzinfo=timezone.utc)
+        assert article.published_at == datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC)
         assert article.teaser == "This is the article content preview..."
         assert article.category_id == "user/-/label/Tech"
         assert article.feed_title == "Example Blog"
@@ -64,7 +64,7 @@ class TestArticle:
             id="123",
             title="Test",
             url="https://example.com",
-            published_at=datetime.now(timezone.utc),
+            published_at=datetime.now(UTC),
             teaser="Content",
             category_id="cat1",
             feed_title="Feed",
@@ -77,7 +77,7 @@ class TestArticle:
             id="123",
             title="Test",
             url="https://example.com",
-            published_at=datetime.now(timezone.utc),
+            published_at=datetime.now(UTC),
             category_id="cat1",
             feed_title="Feed",
         )
@@ -91,7 +91,7 @@ class TestArticle:
                 id="123",
                 title="Test",
                 url="https://example.com",
-                published_at=datetime.now(timezone.utc),
+                published_at=datetime.now(UTC),
                 teaser=long_content,
                 category_id="cat1",
                 feed_title="Feed",
@@ -105,7 +105,7 @@ class TestArticle:
             id="123",
             title="Test",
             url="https://example.com",
-            published_at=datetime.now(timezone.utc),
+            published_at=datetime.now(UTC),
             teaser=content_500,
             category_id="cat1",
             feed_title="Feed",
@@ -119,7 +119,7 @@ class TestArticle:
 
     def test_article_serialization(self):
         """Article can be serialized to dict."""
-        published = datetime(2024, 1, 15, 10, 30, 0, tzinfo=timezone.utc)
+        published = datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC)
         article = Article(
             id="123",
             title="Test",
